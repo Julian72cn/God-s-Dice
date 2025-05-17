@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 25.2.3.2 (Windows)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="2025-05-17T18:21:08.987022900"/>
+	<meta name="Originator" content="Microsoft Word 14"/>
+	<meta name="ProgId" content="Word.Document"/>
+	<meta name="created" content="00:00:00">
+	<meta name="created" content="00:00:00">
+	<meta name="changed" content="00:00:00">
+	<style type="text/css">
+		td p { color: #000000 }
+		p { color: #000000 }
+		body {
+			width: 800px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	</style>
+</head>
+<body lang="zh-CN" text="#000000" dir="ltr" style="border: none; padding: 0cm"><p align="center">
+<font face="Aptos"><font size="4" style="font-size: 16pt"><span lang="en-US"><b>God's
+Dice</b></span></font></font></p>
+<p align="center">&nbsp;中文版链接</p>
+<p><br/>
+<br/>
+
+</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+the article &quot;The Game of Stock Market&quot;, we described the
+process of building a simplified stock market trading simulation
+system. In this simulation system:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;Based
+on the behavioral characteristics of traders, we have added several
+types of investors, including: value investors, trend investors,
+up-and-down investors, random investors, never-stop-loss investors,
+bottom-picking investors, and news investors.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;In
+terms of trading, we only used a call auction to simulate daily
+trading, generate price sequences and trading volume sequences, and
+observe market changes.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">3.&nbsp;From
+the output of the simulation results, we can observe the fluctuations
+in stock prices and trading volumes, as well as the average changes
+in assets, cash, and holdings of each type of investor.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">4.&nbsp;We
+have added the function of injecting or withdrawing funds into the
+market, and added the transaction fee information, so that we can
+observe the impact of overall market capital changes on transactions.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Next,
+we will continue this game, which will be more realistic and explore
+some issues that were not discussed in &quot; The Game of Stock
+Market &quot;.</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>I.&nbsp;Model
+Adjustment</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Before
+starting a new topic, let's make some necessary adjustments to the
+model:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;The
+value curve sequence square wave is changed to a pre-generated
+method, and the random number seed can be set to generate different
+value curves (to facilitate subsequent testing and analysis);</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;In
+order to make the trading behavior of value investors more consistent
+with the actual investment strategy, modify the operation method of
+value investors:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">a)&nbsp;They
+will adjust their holdings according to the degree of deviation
+between price and valuation. When the price is close to the
+valuation, the holding ratio is close to the target value
+(about&nbsp;50%&nbsp;). When the price deviates significantly from
+the valuation, the holding ratio will be adjusted accordingly, and
+eventually the position will be full or empty. Different investors
+have different tolerances for price deviations, resulting in
+different maximum deviation ratios. Different investors also have
+different target holding ratios, reflecting different risk
+preferences.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">b)&nbsp;When
+the value curve changes, value investors will not respond immediately
+to changes in stock value, butwill re-evaluate after a lag period
+of&nbsp;1-20 days. The valuation deviation percentages of all
+investors generally follow a normal distribution with a mean of&nbsp;0&nbsp;and
+a standard deviation of&nbsp;15%&nbsp;(settable).</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">3.&nbsp;Because
+random investors are easily affected by market sentiment, a market
+sentiment indicator is introduced, and the investment strategy of
+random investors will be affected by this indicator: their trading
+probability is affected by market sentiment, and the trading
+probability increases when the sentiment is high, and vice versa; and
+their trading ratio is also affected by market sentiment, and the
+trading ratio increases when the sentiment is high, and vice versa.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">4.&nbsp;Introduce
+new insider traders: They are investors who can obtain public
+information in advance to learn about changes in stock value
+(equivalent to bad or good news). We assume that they have the
+following characteristics:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">a)&nbsp;Be
+able to know the direction of stock value changes&nbsp;1-5&nbsp;days
+in advance</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="3" style="font-size: 12pt">b)&nbsp;</font></font>&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When
+they predict that the future value will rise, they buy; when they
+predict that the future value will fall, they sell;</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">c)&nbsp;Set
+certain take-profit, stop-loss and holding period targets in the
+simulation.</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">The
+code&nbsp;main_OHLC_2.0.5.py&nbsp;first made the above
+modifications&nbsp;based on&nbsp;main_ca_3.2.1.1.py , the main
+purpose is to make it closer to the actual market situation.
+However,&nbsp;</font></font><font face="Aptos"><font size="2" style="font-size: 11pt"><u>the
+biggest</u></font></font>&nbsp;<font face="Aptos"><font size="2" style="font-size: 11pt">adjustments
+made to the code are as follows:</font></font></span></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;To
+be as close to the real market as possible, each trading day is
+divided into three stages: opening, intraday, and closing;</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;Opening
+call auction:&nbsp;30%-50%&nbsp;of orders are randomly selected to
+participate in the opening call auction</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="3" style="font-size: 12pt">3.&nbsp;</font></font>&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Intraday
+trading: up to&nbsp;100&nbsp;rounds of iterations,&nbsp;10%-30%&nbsp;of
+orders are randomly selected in each round to participate in this
+round of matching. Unfulfilled orders have&nbsp;a 40%&nbsp;probability
+of returning to the main order list,&nbsp;a 30%&nbsp;probability of
+entering the closing call auction, and&nbsp;a 30%&nbsp;probability of
+being cancelled.</font></font></span></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">4.&nbsp;Closing
+auction: All remaining orders participate in the closing auction</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">5.&nbsp;The
+price that can generate the largest transaction volume is selected as
+the transaction price. If there are multiple prices that generate the
+same maximum transaction volume, the price closest to the previous
+price is selected.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+detailed code can be found&nbsp;in main_OHLC_2.0.5.py&nbsp;. After
+running, the running results are as shown in the figure below:</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice4660.png" name="图像1" align="bottom" width="517" height="115" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;1</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice4671.png" name="图像2" align="bottom" width="553" height="98" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;2</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure
+1&nbsp;above&nbsp;is a&nbsp;100-day operation simulation;
+Figure&nbsp;2&nbsp;above is a&nbsp;1000-day operation simulation.</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>II.&nbsp;Random
+Walk</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Einstein
+once said,&nbsp;&quot;&nbsp;I am sure, at any rate, that God does not
+play dice.&nbsp;&quot;&nbsp;But the opposite is true in many aspects
+of the real world. Almost everything is full of uncertainty,
+especially in the financial world.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">There
+is an important theory in finance related to the randomness of the
+stock market called the Random&nbsp;Walk&nbsp;Theory . Its main
+points are as follows:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;Price
+changes are random and unpredictable: The random walk theory believes
+that stock price changes are similar to&nbsp;&quot;&nbsp;Brownian
+motion&nbsp;&quot;&nbsp;, that is, each step of rise and fall is
+independent and there is no pattern to follow; since market
+information appears randomly (such as economic data, political
+events, etc.), price changes are also random, and future trends
+cannot be predicted through historical data.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;The
+market is efficient and prices have reflected all information: This
+theory is based on the Efficient Market Hypothesis (&nbsp;EMH&nbsp;),
+which holds that market prices have fully digested all public
+information, including fundamentals, news, market sentiment, etc.
+Therefore, no technical analysis or fundamental analysis can
+continuously beat the market because prices are already at&nbsp;a
+&quot;&nbsp;reasonable&nbsp;&quot;&nbsp;level.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">3.&nbsp;Active
+investing is unlikely to consistently outperform the market, so
+passive investing (such as index funds) is better: Due to random
+price fluctuations, excess returns for fund managers or investors are
+mostly due to luck rather than skill; since the market is difficult
+to beat, the theory suggests that investors adopt&nbsp;a “&nbsp;buy
+and hold&nbsp;”&nbsp;strategy.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">4.&nbsp;Oppose
+technical analysis and trend prediction: The random walk theory
+believes that technical analysis (such as&nbsp;K&nbsp;-line charts,
+moving averages, etc.) is invalid because price changes have no
+memory and past trends will not affect the future.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">5.&nbsp;Extreme
+fluctuations are rare, and most stocks have limited fluctuations: the
+proportion of stocks that rise sharply (&nbsp;such as a&nbsp;4-5&nbsp;times
+increase) or plummet (such as a&nbsp;99%&nbsp;drop ) is very low, and
+the fluctuation range of most stocks is&nbsp;between �10% and 30%&nbsp;,
+which conforms to the normal distribution.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+our project, as mentioned in the previous
+paragraph,&nbsp;main_OHLC_2.0.5.py&nbsp;adjusted the market trading
+method, and the adjusted running results showed random
+characteristics. The three figures below are three simulations
+of&nbsp;main_OHLC_2.0.5.py running for&nbsp;1000&nbsp;days without
+changing any other parameters&nbsp;, and the market price and trading
+volume changes are different.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice7245.png" name="图像3" align="bottom" width="554" height="98" border="0"/>
+
+&nbsp;</p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice7247.png" name="图像4" align="bottom" width="554" height="102" border="0"/>
+
+&nbsp;</p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice7249.png" name="图像5" align="bottom" width="553" height="100" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;3</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">As
+mentioned above, the random walk theory believes that since market
+information appears randomly (such as economic data, political
+events, etc.), price changes are also random. However, from the
+results of program simulation, we cannot rule out the impact of the
+randomness of stock market participants' behavior on the market. The
+frequency of economic data and political events is much lower than
+the frequency of random behavior of stock market participants. The
+various behaviors of stock market participants occur all the time and
+will have an impact on the stock market all the time. If the behavior
+of traders has random characteristics, it will inevitably lead to the
+randomness of stock prices. For example, a value investor made a buy
+decision at the close of the previous day, and he may buy at any time
+on the second day; a trend investor may also delay the time of the
+original transaction because of a phone call&nbsp;...&nbsp;At this
+time, their counterparts will also be different. The occurrence of a
+series of random behaviors of traders will lead to intraday
+fluctuations, and finally lead to the randomness of the closing
+price, and the closing price will affect some investors who rely on
+the closing price sequence to make decisions, thereby changing their
+trading behavior and affecting the next day's trading. In this way,
+day after day, even without the influence of economic data and
+political events, random walks will still occur. Of course, sudden
+economic data, political events, and the random occurrence of
+negative and positive factors in a company itself will also affect
+investors' decisions, and ultimately, through changes in their
+behavior, will bring price fluctuations to the market.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+random walk theory is a theory that is summarized and analyzed by
+observing the real world market. There is a problem: due to the
+randomness of the price sequence, the price sequence we get is just
+one of countless possible price sequences, and this sequence is
+formed by countless coincidences. Various factors will have an impact
+on stock prices, but it is difficult for us to analyze the impact of
+each of these factors based on this existing sequence alone.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+program&nbsp;main_OHLC_2.0.5.py&nbsp;can simulate many random
+sequences of stock prices based on some assumptions, and then we can
+use the mathematical methods for processing random sequences to
+process them. We need to emphasize that this provides a systematic
+method of thinking, researching and analyzing the stock market (or
+other financial systems) based on behavioral finance. At this stage,
+don't pay too much attention to whether the assumptions of market
+participants and their data are absolutely correct: although the
+assumed participants in the program are based on reality, they are
+certainly very different from the real market. But I think that if we
+can get more information about investors' investment styles or habits
+from the big data of the stock market (for example: how much money,
+whether they are technical or fundamental, what time they like to buy
+or sell, etc.), we may be able to get a simulation that is closer to
+reality.</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>III.&nbsp;Brownian
+motion</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+this section, we will discuss whether the price curve generated by
+our simulation program conforms to the geometric Brownian motion.
+We&nbsp;made a few changes to the&nbsp;main_OHLC_2.0.5.py program,
+with the aim of setting a random number seed for each pseudo-random
+number generated in order to achieve reproducibility. The generated
+program is&nbsp;main_OHLC_2.0.5.1.py&nbsp;. In addition, we wrote a
+Brownian motion detection program -&nbsp;brownian_motion_test_1.0.py&nbsp;.
+Here we simulate the data changes of stock prices for&nbsp;2000&nbsp;days,
+and the test report is as follows:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;Normality
+test: passed all normality tests very well</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;Shapiro-Wilk&nbsp;test:&nbsp;p&nbsp;value
+is&nbsp;0.428901 &gt; 0.05&nbsp;, indicating that the return
+distribution cannot reject the normal distribution hypothesis</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;Jarque-Bera&nbsp;test:&nbsp;p&nbsp;value
+is&nbsp;0.291005 &gt; 0.05&nbsp;, which also supports that the rate
+of return follows a normal distribution</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">3.&nbsp;Lilliefors&nbsp;test:&nbsp;p&nbsp;value
+is&nbsp;0.515399 &gt; 0.05&nbsp;, further confirming that the rate of
+return follows a normal distribution</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">4.&nbsp;Skewness:&nbsp;-0.0857&nbsp;,
+close to&nbsp;0&nbsp;, indicating that the distribution is basically
+symmetrical and slightly biased to the&nbsp;left</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">5.&nbsp;Excess&nbsp;&nbsp;Kurtosis:&nbsp;-0.0159&nbsp;,
+very close to&nbsp;0&nbsp;, indicating that the tail of the
+distribution is very similar to the normal distribution</span></font></font></p>
+<p style="text-indent: 0.74cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Conclusion:
+All normality tests passed very well.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;Autocorrelation
+test:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;Ljung-Box&nbsp;test:&nbsp;p&nbsp;-value
+is&nbsp;0.230261 &gt; 0.05&nbsp;, indicating that there is no
+significant autocorrelation between the returns</span></font></font></p>
+<p style="text-indent: -0.01cm; margin-left: 0.75cm; orphans: 1"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Conclusion:
+The autocorrelation test was passed, indicating that there is no
+significant correlation between the returns.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">3.&nbsp;Variance&nbsp;-&nbsp;time
+relationship test:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;Slope&nbsp;&nbsp;(log&nbsp;-&nbsp;log
+coordinates):&nbsp;-0.0217&nbsp;, the theoretical value should be&nbsp;1.0</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;R&nbsp;-square:&nbsp;0.1012&nbsp;,
+low fit</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">3.&nbsp;Deviation
+from theoretical value:&nbsp;1.0217 ,&nbsp;large&nbsp;deviation</span></font></font></p>
+<p style="text-indent: -0.01cm; margin-left: 0.75cm; orphans: 1"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Conclusion:
+Theoretically it should be&nbsp;1.0&nbsp;. This is the only&nbsp;test&nbsp;that
+does not conform to the characteristics of Brownian motion.</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 0.64cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">4.&nbsp;Random
+walk test:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;ADF&nbsp;test:&nbsp;p&nbsp;value
+is&nbsp;0.981601 &gt; 0.05</span></font></font></p>
+<p style="text-indent: -0.01cm; margin-left: 0.75cm; orphans: 1"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Conclusion:
+It passed the random walk test and the random walk characteristics
+are very obvious.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hurst&nbsp;Index:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">2.&nbsp;The
+value is&nbsp;0.4892&nbsp;, which is very close to&nbsp;0.5&nbsp;(the
+theoretical value of Brownian motion)</span></font></font></p>
+<p style="text-indent: -0.01cm; margin-left: 0.75cm; orphans: 1"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Conclusion:
+Very close to ideal Brownian motion, exhibiting slight
+anti-persistence.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Summary:
+The simulated stock price data also meets&nbsp;4&nbsp;of&nbsp;the
+5&nbsp;conditions , so the conclusion is that&nbsp;&quot;&nbsp;the
+price series strongly resembles Brownian motion&nbsp;&quot;&nbsp;.
+The generated price curves show very strong Brownian motion
+characteristics for longer time series. After increasing the sample
+size (from&nbsp;500&nbsp;to&nbsp;2000&nbsp;), the Brownian motion
+characteristics of both data become more obvious, especially the
+random walk characteristics and&nbsp;the Hurst&nbsp;exponent. Despite
+the deviation from the variance&nbsp;-&nbsp;time relationship, the
+simulated stock price data still meets most of the key
+characteristics of Brownian motion, indicating that the model can be
+well used for financial market simulation. For the failure to pass
+the variance&nbsp;-&nbsp;time relationship test, this may be due to:
+there may be problems with our test method; the discrete simulation
+of Brownian motion itself may cause this deviation; a more complex
+model (such as fractional Brownian motion) may be needed to better
+capture this relationship.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice13639.png" name="图像6" align="bottom" width="494" height="247" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;4</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice13650.png" name="图像7" align="bottom" width="521" height="203" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;5</span></font></font></p>
+<p>&nbsp;</p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice13662.png" name="图像8" align="bottom" width="403" height="312" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;6</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice13673.png" name="图像9" align="bottom" width="475" height="250" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;7</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice13684.png" name="图像10" align="bottom" width="486" height="248" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;8</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>IV.&nbsp;The
+Butterfly Effect</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+&quot;&nbsp;butterfly effect&nbsp;&quot;&nbsp;was first proposed
+by&nbsp;Lorenz&nbsp;in his research in&nbsp;1963.&nbsp;It originated
+from his discovery of the extreme sensitivity of weather models to
+initial conditions. This discovery was later visualized as&nbsp;&quot;&nbsp;a
+butterfly&nbsp;flapping&nbsp;its wings in Brazil may cause a typhoon
+in the Pacific&nbsp;&quot;&nbsp;, emphasizing that small changes may
+lead to big results.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+financial systems such as the stock market, this theory is used to
+describe the market's amplification effect on small events. Studies
+have shown that the stock market is an open system that is affected
+by multiple factors, such as economic data, political events, and
+investor psychology. This system characteristic makes it susceptible
+to the butterfly effect. Behavioral finance research believes that
+investor psychology and bias will affect the market. The butterfly
+effect is reflected here in that small changes in investor sentiment
+may amplify market fluctuations. Below we simulate three situations:</span></font></font></p>
+<p style="text-indent: -0.95cm; margin-left: 0.95cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>1.&nbsp;Changes
+in closing price:</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+program butterfly_effect_simulation_1.0.py&nbsp;in the project&nbsp;can
+simulate the butterfly effect. The program is based on the
+existing&nbsp;main_OHLC_2.0.5.1.py&nbsp;file. By modifying the
+closing price of a specified date (such as&nbsp;300&nbsp;days) (the
+change ratios are&nbsp;0.5%, 1.5%, 4%, -0.5%, -1.5%, -4%&nbsp;), it
+simulates a sudden change in the closing market of a certain day for
+some reason, and then observes and compares the impact of this small
+change on the subsequent market. In the test, the random number seed
+is set to be completely consistent, and other parameters are
+completely unchanged. Only the impact of small fluctuations in the
+closing price on the subsequent closing price sequence is observed.
+The results are shown in the figure below:</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice15454.png" name="图像11" align="bottom" width="441" height="165" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;9</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice15465.png" name="图像12" align="bottom" width="524" height="412" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;10</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+statistical table contains the following information: percentage
+change of initial setting, maximum difference, final difference,
+average difference, magnification direction, etc.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Through
+the graphical display, we can observe the following phenomena:</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">A.&nbsp;Compared
+to the black baseline (the 300-day&nbsp;0%&nbsp;deviation price
+curve), the other price curves are significantly different, even if
+the change&nbsp;is only 0.5%</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">B.&nbsp;The
+fluctuation range of the later price curve has little to do with the
+initial deviation</span></font></font></p>
+<p style="text-indent: -0.64cm; margin-left: 1.41cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">C.&nbsp;These
+price curves still have the trend of following the value curve (grey
+dotted line)</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+figure below shows a more extreme change, where the corrected price
+curves deviate significantly from the baseline after the value curve
+continues to fall.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice16226.png" name="图像13" align="bottom" width="492" height="390" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;11</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">By
+modifying the program, we can also simulate the impact of other
+sudden changes in internal and external environments (even small
+changes) on long-term stock price fluctuations.</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.95cm; margin-left: 0.95cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>2.&nbsp;The
+influence of individual behavior - the first case</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Here
+we simulate (program&nbsp;butterfly_effect_simulation_1.2.py&nbsp;)
+how the sudden participation of a single investor can have a
+long-term impact on the entire market. We design an investor who
+suddenly participates in the transaction (&nbsp;Sudden Investor&nbsp;),
+who buys stocks&nbsp;at a price slightly higher than the market price
+at that time (premium&nbsp;5% ) on a specified trading day
+(&nbsp;300th&nbsp;day) , and then observe the impact of this
+intervention on subsequent market price trends.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">We
+conducted multiple sets of simulations, each with different initial
+capital of sudden investors (ranging from&nbsp;300&nbsp;yuan
+to&nbsp;100,000&nbsp;yuan), and compared them with the baseline
+simulation (without the participation of sudden investors) to analyze
+the impact of different sizes of funds on the market.</span></font></font></p>
+<center>
+	<table cellpadding="2" cellspacing="0">
+		<tr valign="top">
+			<td width="85" style="border: 1.00pt solid #000000; padding: 0.05cm 0.19cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 9pt"><span lang="en-US"><b>Investor
+				funds</b></span></font></font></p>
+			</td>
+			<td width="88" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 9pt"><span lang="en-US"><b>Order
+				quantity</b></span></font></font></p>
+			</td>
+			<td width="81" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 9pt"><span lang="en-US"><b>Transaction
+				Quantity</b></span></font></font></p>
+			</td>
+			<td width="77" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 9pt"><span lang="en-US"><b>Transaction
+				ratio</b></span></font></font></p>
+			</td>
+			<td width="86" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 9pt"><span lang="en-US"><b>Remaining
+				cash</b></span></font></font></p>
+			</td>
+			<td width="89" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 9pt"><span lang="en-US"><b>Transaction
+				status</b></span></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.19cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">300&nbsp;</span></font></font></span></font></p>
+			</td>
+			<td width="88" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">3&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="81" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">3&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">100%</span></font></font></p>
+			</td>
+			<td width="86" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">74.55&nbsp;</span></font></font></span></font></p>
+			</td>
+			<td width="89" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">All
+				sold</span></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.19cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">1,000</span></font></font></span></font></p>
+			</td>
+			<td width="88" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">13&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="81" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">13&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">100%</span></font></font></p>
+			</td>
+			<td width="86" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">23.06&nbsp;</span></font></font></span></font></p>
+			</td>
+			<td width="89" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">All
+				sold</span></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.19cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">5,000</span></font></font></span></font></p>
+			</td>
+			<td width="88" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">65&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="81" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">65&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">100%</span></font></font></p>
+			</td>
+			<td width="86" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">115.31</span></font></font></span></font></p>
+			</td>
+			<td width="89" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">All
+				sold</span></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.19cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">10,000</span></font></font></span></font></p>
+			</td>
+			<td width="88" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">131&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="81" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">129&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">98.50%</span></font></font></p>
+			</td>
+			<td width="86" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">22.46&nbsp;</span></font></font></span></font></p>
+			</td>
+			<td width="89" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Partially
+				sold</span></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.19cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">20,000</span></font></font></span></font></p>
+			</td>
+			<td width="88" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">263&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="81" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">155&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">58.90%</span></font></font></p>
+			</td>
+			<td width="86" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">8,011.48&nbsp;</span></font></font></span></font></p>
+			</td>
+			<td width="89" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Partially
+				sold</span></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.19cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">50,000</span></font></font></span></font></p>
+			</td>
+			<td width="88" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">658&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="81" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">155&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">23.60%</span></font></font></p>
+			</td>
+			<td width="86" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">38,011.48</span></font></font></span></font></p>
+			</td>
+			<td width="89" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Partially
+				sold</span></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.19cm; padding-right: 0.19cm"><p>
+				<font face="等线">￥</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">100,000</span></font></font></span></font></p>
+			</td>
+			<td width="88" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">1,317&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="81" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">155&nbsp;shares</span></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">11.80%</span></font></font></p>
+			</td>
+			<td width="86" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">88,011.48n</span></font></font></p>
+			</td>
+			<td width="89" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.19cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Partially
+				sold</span></font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Since
+the number of participants in each category is relatively small
+(&nbsp;100&nbsp;people), in the above table, small-amount orders
+(&nbsp;≤5,000&nbsp;yuan) can be fully executed, while larger orders
+are only partially executed. The maximum tradable&nbsp;volume of the
+current-sized market&nbsp;is approximately&nbsp;155&nbsp;shares.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice18047.png" name="图像14" align="bottom" width="508" height="418" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;12</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+figure below shows&nbsp;the operating results when setting&nbsp;a 2%
+premium to buy.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice18138.png" name="图像15" align="bottom" width="502" height="418" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;13</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+following figure shows&nbsp;the result of setting&nbsp;a 1% premium
+to buy. The transaction record shows that all investors only
+bought&nbsp;2&nbsp;shares. This indicates that when the market depth
+is limited, there are limited sell orders in the market, or there is
+competition from buy orders from other investors, which means that
+even if more funds are provided, more stocks cannot be bought.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice18531.png" name="图像16" align="bottom" width="496" height="404" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;14</span></font></font></p>
+<p><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">From
+the running results, we can find that:&nbsp;①&nbsp;In all cases,
+the sudden participation of investors caused the market price to
+deviate from the benchmark simulation, indicating that buying
+behavior has an impact on the market price.&nbsp;②&nbsp;</font></font><font face="Aptos"><font size="2" style="font-size: 11pt"><u>Even
+small amounts of funds can have a significant impact on the market,
+and even if the trading volume is only two shares, it can have a
+significant impact on the market</u></font></font>&nbsp;<font face="Aptos"><font size="2" style="font-size: 11pt">.&nbsp;③&nbsp;The
+price deviation caused by the initial intervention still exists at
+the end of the simulation, indicating that the market has not
+completely returned to the non-intervention state.&nbsp;④&nbsp;There
+is no obvious relationship between the intensity of the butterfly
+effect and the size of the sudden purchase amount.</font></font></span></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Let's
+briefly analyze the possible causes or mechanisms of the butterfly
+effect:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">A.&nbsp;Direct
+causes:&nbsp;①&nbsp;Price discovery: Suddenly, investors&nbsp;placed
+orders at a premium of 5%&nbsp;above the market price , which
+directly increased the buying pressure in the market, leading to a
+higher transaction price in the auction.&nbsp;②&nbsp;Liquidity
+absorption: Investors' buy orders absorbed some of the sell orders in
+the market, reducing the number of shares available for other buyers
+to purchase, further pushing up prices.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">B.&nbsp;Indirect
+causes:&nbsp;①&nbsp;Changes in investor behavior: Initial price
+changes may cause other investors (such as trend investors, investors
+who chase ups and downs) to change their trading decisions, forming a
+chain reaction.&nbsp;②&nbsp;Changes in technical indicators: Price
+changes affect technical indicators such as moving averages, further
+affecting the decisions of investors who rely on these
+indicators.&nbsp;③&nbsp;Transmission of market sentiment: Price
+increases may be interpreted as positive signals, triggering more
+buying behavior, forming a positive feedback loop.&nbsp;④&nbsp;Sustained
+long-term impact: Even long after sudden investor transactions,
+market prices still deviate from the benchmark, indicating that the
+impact of the initial intervention is amplified and continued through
+market mechanisms.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In&nbsp;butterfly_effect_simulation_1.3.py&nbsp;and&nbsp;butterfly_effect_simulation_1.4.py&nbsp;,
+the number of all other investors&nbsp;in the market except the
+sudden investor&nbsp;is enlarged by&nbsp;10&nbsp;and&nbsp;50&nbsp;times
+to study whether the sudden participation of a single investor can
+still produce a significant butterfly effect in a larger market. The
+experiment maintains the same random number seed and other parameter
+settings so that the results can be directly compared with the
+small-scale market. The following two&nbsp;figures&nbsp;are generated
+by version&nbsp;1.3&nbsp;and&nbsp;1.4&nbsp;of the program
+respectively:</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice21111.png" name="图像17" align="bottom" width="490" height="396" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;15</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice21123.png" name="图像18" align="bottom" width="499" height="404" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;16</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Compared
+with the small-scale market, the order transaction situation in the
+large-scale market has changed significantly - the transaction rate
+has increased, indicating that the liquidity of the large-scale
+market has increased significantly. The market can find some new
+rules:&nbsp;①&nbsp;In the large-scale market, the maximum price
+deviation that investors can suddenly produce is generally smaller
+than that in the small-scale market, and the intensity of the
+butterfly effect is generally weakened, indicating that the market
+size is negatively correlated with the intensity of the butterfly
+effect.&nbsp;②&nbsp;The impact ratio of the amount of funds
+(maximum price difference&nbsp;/&nbsp;10,000 yuan of funds) has
+decreased in the large-scale market, indicating that the influence of
+unit funds has weakened after the market scale has expanded.&nbsp;③&nbsp;Small
+funds can still have an impact in the large-scale market and have a
+relatively higher impact ratio.&nbsp;④&nbsp;As the market size
+increases, the relative impact intensity of the butterfly effect
+generally shows a downward trend, but the rate of decline is not
+linear.</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.95cm; margin-left: 0.95cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>3.&nbsp;The
+influence of individual behavior - the second case</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">This
+is an unexpected discovery, but it is very necessary to list it
+separately. We set&nbsp;the buy premium parameter (&nbsp;price_premium&nbsp;)
+of&nbsp;butterfly_effect_simulation_1.2.py to&nbsp;0.&nbsp;After
+running, all investor orders were not executed, but the result of the
+operation was: the market price was still affected, showing the
+butterfly effect.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice22619.png" name="图像19" align="bottom" width="502" height="413" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;17</span></font></font></p>
+<p><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">This
+simulation illustrates the complexity of the price formation
+mechanism in market microstructure and the potential impact of
+investor actions on the market even if these actions do not directly
+lead to the execution of trades:&nbsp;</font></font><font face="Aptos"><font size="2" style="font-size: 11pt"><u>market
+prices are affected not only by actual trades but also by potential
+willingness to trade</u></font></font>&nbsp;<font face="Aptos"><font size="2" style="font-size: 11pt">.</font></font></span></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Possible
+reasons why unfilled orders affect the market include:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">A.&nbsp;Order&nbsp;book&nbsp;impact:
+The existence of a buy order changes the supply and demand balance in
+the market and affects the decisions of other investors. In the
+bidding mechanism, even if an order fails to be executed, it
+participates in the price discovery process.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">B.&nbsp;Changes
+in trading behavior: From the changes in trading volume, it can be
+seen that the participation of a single investor changes the trading
+behavior of other investors, even if the investor’s own orders are
+not executed on that day.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+the real market, there are two other factors that may affect the
+market due to unfilled orders:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">A.&nbsp;Information
+transmission: Orders convey information about investment intentions
+and influence other investors’ expectations of the market. In
+particular, large orders may be regarded as market signals by other
+investors.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">B.&nbsp;Market
+sentiment transmission: The behavior of a single investor may affect
+a small number of investors, which in turn affects more investors,
+forming a chain reaction. This may be another core mechanism of the
+butterfly effect.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+implication of this result for real markets is that even unfulfilled
+orders may indirectly affect market prices by influencing the
+behavior of other market participants. This&nbsp;&quot;&nbsp;existential
+influence&nbsp;&quot;&nbsp;is particularly important in modern
+markets dominated by high-frequency trading and algorithmic trading.</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+summary, we have used simulation experiments to confirm the existence
+of the&nbsp;&quot;&nbsp;butterfly effect&nbsp;&quot;&nbsp;phenomenon
+in the stock market: the sudden participation of an investor, even if
+the amount of funds is small and even if there is no transaction, may
+have a long-term and significant impact on market prices. This impact
+is transmitted and amplified through direct price discovery
+mechanisms and indirect investor behavior change mechanisms, causing
+market prices to deviate from the trajectory without intervention for
+a long time. As mentioned before: a butterfly&nbsp;flapping&nbsp;its
+wings may cause a typhoon in the Pacific. People often say: &quot;No
+snowflake is innocent in an avalanche.&quot; The same is true in the
+stock market.</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>V.&nbsp;Monte
+Carlo Method</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Since
+stock prices are random sequences, we can use the same methods to
+process and analyze random sequences to process them. The Monte Carlo
+method&nbsp;is&nbsp;one of them. The Monte Carlo method is a
+numerical computing technique based on random sampling. It is widely
+used to simulate and analyze random sequences (such as financial time
+series, physical processes, engineering systems, etc.). Its core idea
+is to approximate the real distribution or calculate complex
+mathematical problems through a large number of random experiments:</span></font></font></p>
+<p style="text-indent: -1.03cm; margin-left: 1.03cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">1.&nbsp;Core
+steps</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="3" style="font-size: 12pt">a)&nbsp;</font></font>&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Define
+the random process:&nbsp;clarify&nbsp;the random sequence model to be
+simulated.</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">b)&nbsp;Generate
+random samples: Generate random pathsthrough a pseudo-random number
+generator (&nbsp;PRNG&nbsp;) or a quasi-Monte Carlo method (such
+as&nbsp;the Sobol sequence).</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">c)&nbsp;Calculate
+statistics: perform statistical analysis on the simulation results
+(such as mean, variance, quantile, etc.).</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">d)&nbsp;Convergence
+test: Increase the number of simulations to improve accuracy (the law
+of large numbers ensures convergence).</span></font></font></p>
+<p style="text-indent: -1.03cm; margin-left: 1.03cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">2.&nbsp;Mathematical
+foundation</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">a)&nbsp;Law
+of large numbers: When the number of simulations&nbsp;N→∞&nbsp;,
+the sample mean approaches the expected value:</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice26271.png" name="图像20" align="bottom" width="143" height="46" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">b)&nbsp;Central
+Limit Theorem: The estimated error follows a normal distribution and
+the confidence interval can be calculated.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">So
+far, we have actually completed the first step of the core steps,
+defining the stochastic process using simplified assumptions about
+the behavior of market participants and market rules. Now we will
+implement&nbsp;steps&nbsp;2-3 .</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+following two figures are generated by the
+program&nbsp;MC_simulation_1.0.py&nbsp;(using&nbsp;main_OHLC_2.0.5.1.py&nbsp;as
+a module). They use the Monte Carlo method to simulate the closing
+price mean sequence obtained by generating&nbsp;20&nbsp;and&nbsp;100&nbsp;800&nbsp;-&nbsp;day
+closing price curves respectively by changing the market random
+number seed while keeping other parameters unchanged. We can observe
+that the mean curve converges more with the increase in the number of
+simulations. We can also observe that many closing price curves
+simulated randomly have large fluctuations. In this case, the sample
+mean curve and the stock value curve show a strong correlation. Of
+course, we can calculate the expected value and perform various
+statistical analyses later, but this is not the focus of this
+chapter.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice27393.png" name="图像21" align="bottom" width="355" height="236" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;18</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice27405.png" name="图像22" align="bottom" width="340" height="229" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;19</span></font></font></p>
+<p align="center">&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+following figure is generated by the program&nbsp;MC_simulation_1.1.py&nbsp;,
+which simulates the converged closing price mean sequence obtained by
+generating 100 800-day closing price curves with only the value curve
+unchanged and other random number seeds randomly
+changed&nbsp;.&nbsp;We&nbsp;can&nbsp;observe that this curve has
+slight changes compared with the curve generated by only changing the
+market random number above, but the overall difference is not big.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice27861.png" name="图像23" align="bottom" width="379" height="259" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;20</span></font></font></p>
+<p align="center">&nbsp;</p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>VI.&nbsp;Re-examination
+- the impact of capital</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capital
+injection and withdrawal</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In&nbsp;MC_simulation_1.2.py&nbsp;,
+we added the function of injecting or withdrawing funds from the
+market, and implemented Monte Carlo simulation to analyze the impact
+of funds on the stock price average. The program compares the impact
+of different fund change strategies, supports parallel simulation
+of&nbsp;multiple fund&nbsp;change strategies, and returns the average
+closing price series and true value curve of each strategy. In the
+program, we define&nbsp;multiple fund&nbsp;change strategies,
+including:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Baseline&nbsp;case
+(no funding changes)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Single&nbsp;capital
+injection (10%)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Single
+fund withdrawal (10%)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Massive&nbsp;capital
+injection (50%)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Massive&nbsp;capital
+withdrawal (50%)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Fund
+injection in batches (4&nbsp;times,&nbsp;5%&nbsp;each time)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Fund
+withdrawal in batches (4&nbsp;times,&nbsp;5%&nbsp;each time)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Inject
+first&nbsp;&nbsp;&nbsp;and then withdraw (inject&nbsp;20%&nbsp;first
+and then withdraw&nbsp;20%)</font></font></span></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">This
+modified procedure can help analyze the impact of different fund flow
+scenarios on stock market prices, especially:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Whether
+the capital injection will lead to a rise in the share price</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Whether
+the withdrawal of funds will cause the stock price to fall</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">The
+impact of capital changes of different sizes and timing on the market
+varies</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Short-term
+and long-term impact of funding changes on market prices</font></font></span></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice29182.png" name="图像24" align="bottom" width="553" height="361" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;21</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice29194.png" name="图像25" align="bottom" width="527" height="356" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;22</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice29206.png" name="图像26" align="bottom" width="541" height="348" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;23</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice29218.png" name="图像27" align="bottom" width="523" height="352" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;24</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice29230.png" name="图像28" align="bottom" width="554" height="347" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;25</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice29242.png" name="图像29" align="bottom" width="531" height="355" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;26</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice29254.png" name="图像30" align="bottom" width="539" height="358" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;26</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Through
+the above simulation results (30&nbsp;simulations per round), we can
+observe that the injection and withdrawal of funds will indeed have a
+significant impact on the average market price, and the impact is
+clearly correlated with the amount of funds injected or withdrawn.
+The impact cycle is not limited to the short term, but will also have
+a long-term impact on the market. From the perspective of a single
+simulation event, due to the existence of the butterfly effect, it is
+even possible to set off a storm in the market after the injection of
+funds.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+following is a comparison of the difference between increasing funds
+gradually and suddenly. The same&nbsp;50%&nbsp;increase in funds is
+done in one injection and in&nbsp;five&nbsp;injections
+(see&nbsp;MC_simulation_1.3.py&nbsp;for the code). From the results,
+both the one-time injection and the batch injection have a positive
+impact on the stock price, but the former may cause more drastic
+market fluctuations.</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The
+impact of transaction costs on the market</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+program&nbsp;MC_simulation_1.4.py&nbsp;simulates the impact of
+different transaction costs on the market. The following figure
+simulates four transaction cost situations from top to bottom:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">No&nbsp;transaction
+cost:&nbsp;buy_fee_rate&nbsp;= 0,&nbsp;sell_fee_rate&nbsp;= 0</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Low&nbsp;transaction&nbsp;costs:&nbsp;buy_fee_rate&nbsp;=
+0.0003,&nbsp;sell_fee_rate&nbsp;= 0.0003 (0.03%)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Transaction&nbsp;costs:&nbsp;buy_fee_rate&nbsp;=
+0.001,&nbsp;sell_fee_rate&nbsp;= 0.001 (0.1%)</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">High&nbsp;transaction
+costs:&nbsp;buy_fee_rate&nbsp;= 0.01,&nbsp;sell_fee_rate&nbsp;= 0.01
+(1%)</font></font></span></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">From
+the figure, we can intuitively feel that the differences in the mean
+stock price curves of the four situations are very small.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice30861.png" name="图像31" align="bottom" width="516" height="465" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;27</span></font></font></p>
+<p align="center">&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>VII.&nbsp;Re-examination
+- the impact of investor behavior</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Value
+Investors</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">MC_simulation_bias_std.py&nbsp;attempts
+to study the impact of&nbsp;the bias_percent_std&nbsp;parameter&nbsp;of&nbsp;value
+investors on the market. By running&nbsp;20&nbsp;Monte Carlo
+simulations, we compare three
+different&nbsp;bias_percent_std&nbsp;settings:&nbsp;0.15&nbsp;(low),&nbsp;0.30&nbsp;(medium),
+and&nbsp;0.50&nbsp;(high).</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">A.&nbsp;Overall
+volatility index</span></font></font></p>
+<center>
+	<table cellpadding="2" cellspacing="0">
+		<tr>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border: 1.00pt solid #393b40; padding: 0.16cm 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>index</b></span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><b>Low
+				standard deviation<br/>
+</b></font></font>&nbsp;<font face="Aptos"><font size="2" style="font-size: 10pt"><b>(0.15)</b></font></font></span></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>Standard
+				deviation of mean deviation<br/>
+(0.30)</b></span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>High
+				deviation standard deviation<br/>
+(0.50)</b></span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Average
+				daily volatility&nbsp;(%)</span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">1.3729</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">1.4467</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">1.5289</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Volatility
+				standard deviation&nbsp;(%)</span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.0409</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.0263</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.0362</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Upward
+				volatility&nbsp;(%)</span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.7386</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.7831</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.8215</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Downside
+				volatility&nbsp;(%)</span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.7595</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.7914</span></font></font></p>
+			</td>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.8433</span></font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">B.&nbsp;Maximum
+drawdown analysis</span></font></font></p>
+<center>
+	<table cellpadding="2" cellspacing="0">
+		<tr>
+			<td width="141" bgcolor="#ffffff" style="background: #ffffff; border: 1.00pt solid #393b40; padding: 0.16cm 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>index</b></span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>Low
+				standard deviation<br/>
+(0.15)</b></span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>Standard
+				deviation of mean deviation<br/>
+(0.30)</b></span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 10pt"><b>High
+				deviation standard deviation<br/>
+</b></font></font>&nbsp;<font face="Aptos"><font size="2" style="font-size: 10pt"><b>(0.50)</b></font></font></span></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="141" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Average
+				maximum drawdown&nbsp;(%)</span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">64.9730</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">65.7613</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">66.2239</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="141" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Maximum
+				drawdown standard deviation&nbsp;(%)</span></font></font></p>
+			</td>
+			<td width="113" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">5.5588</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">4.0447</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">4.5874</span></font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">C.&nbsp;</font></font>&nbsp;<font face="Aptos"><font size="2" style="font-size: 11pt">Analysis
+of the relationship between price and value</font></font></span></font></p>
+<center>
+	<table cellpadding="2" cellspacing="0">
+		<tr>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border: 1.00pt solid #393b40; padding: 0.16cm 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>index</b></span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>Low
+				standard deviation<br/>
+(0.15)</b></span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>Standard
+				deviation of mean deviation<br/>
+(0.30)</b></span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>High
+				deviation standard deviation&nbsp;(0.50)</b></span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">The
+				correlation between price and value</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.9528</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.9323</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">0.8822</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">Average
+				deviation between price and value&nbsp;(%)</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">10.8261</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">12.8510</span></font></font></p>
+			</td>
+			<td width="122" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 10pt"><span lang="en-US">15.4079</span></font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p>&nbsp;</p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice32128.png" name="图像32" align="bottom" width="491" height="285" border="0"/>
+
+&nbsp;</p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice32130.png" name="图像33" align="bottom" width="273" height="141" border="0"/>
+
+<img src="God's%20Dice.files/God's%20Dice32131.png" name="图像34" align="bottom" width="274" height="143" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;28</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">From
+the above running results we can see:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">D.&nbsp;Volatility
+increases with the standard deviation of deviation: Data shows that
+as the standard deviation of value investors' deviation increases,
+the market's daily volatility increases significantly.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">E.&nbsp;The
+market is more volatile when prices are falling than when prices are
+rising.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">F.&nbsp;Maximum
+drawdown increases with the standard deviation of deviation: Data
+shows that as the standard deviation of value investors' deviation
+increases, the maximum drawdown of the market also increases.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">G.&nbsp;Price
+and value are positively correlated in all settings,</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">H.&nbsp;The
+average deviation between price and value&nbsp;is positively
+correlated with the standard deviation of the deviation, indicating
+that the larger the distribution of value investors' respective
+valuations, the greater the price volatility.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+above shows that the standard deviation parameter of value investors
+has a significant impact on market volatility. With the increase
+of&nbsp;bias_percent_std&nbsp;, market volatility, maximum drawdown,
+and the deviation between price and value have all changed
+significantly. Of course, the above volatility&nbsp;data&nbsp;is the
+volatility at the statistical level after&nbsp;20&nbsp;tests. For a
+single test, due to its random walk characteristics, its volatility
+may be more intense.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Investors
+who chase ups&nbsp;and downs</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+our hypothesis,&nbsp;there is a parameter&nbsp;for investors who
+chase ups and downs , which is: the observation period&nbsp;N&nbsp;days,
+which represents the number of days of historical price data that
+this type of investor considers when calculating the speed of price
+changes. In this section, we will compare the different impacts&nbsp;of
+investors who chase ups and downs&nbsp;with different observation
+periods on the market. We set up three different observation periods:
+short-term&nbsp;(N=3)&nbsp;, medium-term&nbsp;(N=10)&nbsp;and
+long-term&nbsp;(N=20) , and run&nbsp;20&nbsp;simulations for each
+setting through the Monte Carlo simulation method&nbsp;to ensure the
+statistical reliability of the results.<br/>
+(For detailed code,
+see&nbsp;MC_simulation_chase_period.py&nbsp;)</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice34178.png" name="图像35" align="bottom" width="444" height="213" border="0"/>
+
+&nbsp;</p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice34180.png" name="图像36" align="bottom" width="260" height="126" border="0"/>
+
+<img src="God's%20Dice.files/God's%20Dice34181.png" name="图像37" align="bottom" width="285" height="138" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;29</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">After
+running, the following phenomena can be found:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">A.&nbsp;The
+relationship between market volatility and observation period:
+As&nbsp;ChaseInvestor's&nbsp;observation period increases, the
+overall market volatility shows a downward trend.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Short-term
+observation period&nbsp;(N=3)&nbsp;: average daily volatility
+is&nbsp;1.5374%</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Medium-term
+observation period&nbsp;(N=10)&nbsp;: average daily volatility
+is&nbsp;1.4555%</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Long-term
+observation period&nbsp;(N=20)&nbsp;: average daily volatility
+is&nbsp;1.4121%</font></font></span></font></p>
+<p style="margin-left: 0.78cm; orphans: 2"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">This
+suggests that when&nbsp;investors&nbsp;use a longer observation
+period to evaluate price trends, market price fluctuations become
+more stable. This may be because the long observation period makes
+investors less sensitive to short-term price fluctuations, thereby
+reducing overreaction and frequent trading.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">B.&nbsp;Upward
+and downward volatility analysis: Under all three observation period
+settings, the downward volatility is slightly higher than the upward
+volatility, and this difference increases with the increase of the
+observation period:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;N=3&nbsp;,
+the upside&nbsp;/&nbsp;downside volatility ratio is&nbsp;0.9993</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;&nbsp;N=10&nbsp;,
+the upside&nbsp;/&nbsp;downside volatility ratio is&nbsp;0.9667</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;&nbsp;N=20&nbsp;,
+the upside&nbsp;/&nbsp;downside volatility ratio is&nbsp;0.9592</font></font></span></font></p>
+<p style="margin-left: 0.78cm; orphans: 2"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">This
+finding shows that regardless of the observation period, the market
+volatility is greater when prices fall than when they rise, which is
+consistent with the&nbsp;&quot;&nbsp;panic selling&nbsp;&quot;&nbsp;phenomenon
+commonly seen in real markets. This asymmetry becomes more obvious as
+the observation period increases.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">C.&nbsp;Relationship
+between price and value: Under all observation period settings, there
+is a strong positive correlation between market price and underlying
+value, but this correlation weakens as the observation period
+increases.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When
+N=3&nbsp;, the correlation is&nbsp;0.9670</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When
+N=10&nbsp;, the correlation is&nbsp;0.9358</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When
+N=20&nbsp;, the correlation is&nbsp;0.9261</font></font></span></font></p>
+<p style="margin-left: 0.78cm; orphans: 2"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">At
+the same time, the average deviation between price and value
+increases as the observation period increases:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;N=3&nbsp;,
+the average deviation is&nbsp;10.1180%</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;&nbsp;N=10&nbsp;,
+the average deviation is&nbsp;12.7666%</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;&nbsp;N=20&nbsp;,
+the average deviation is&nbsp;14.7752%</font></font></span></font></p>
+<p style="margin-left: 0.78cm; orphans: 2"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">This
+suggests that when&nbsp;investors who chase gains and losses&nbsp;use
+a longer observation period, market prices are more likely to deviate
+from underlying values </font></font>​​<font face="Aptos"><font size="2" style="font-size: 11pt">and
+market efficiency may decrease.</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">D.&nbsp;Maximum
+Drawdown Analysis: Maximum drawdown is an important indicator for
+measuring investment risk. Studies have found that as the observation
+period increases, the average maximum drawdown of the market
+increases significantly.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;&nbsp;N=3&nbsp;,
+the average maximum drawdown is&nbsp;63.0137%</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;N=10&nbsp;,
+the average maximum drawdown is&nbsp;65.9761%</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.52cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">When&nbsp;N=20&nbsp;,
+the average maximum drawdown is&nbsp;67.8714%</font></font></span></font></p>
+<p style="margin-left: 0.78cm; orphans: 2"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">At
+the same time, the standard deviation of the maximum drawdown also
+increases with the increase of the observation period
+(from&nbsp;2.6433%&nbsp;to&nbsp;5.9085%&nbsp;), indicating that the
+long-term observation period not only increases the drawdown
+amplitude, but also increases the uncertainty of the drawdown.</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Through
+the above phenomena, we can roughly summarize the following
+conclusions from a statistical sense:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">A.&nbsp;Shorter
+observation periods lead to higher market volatility: When&nbsp;investors
+who chase ups and downs&nbsp;are more sensitive to short-term price
+changes, overall market volatility increases. This may be because
+they trade more frequently, amplifying price fluctuations.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">B.&nbsp;Longer
+observation periods lead to larger maximum drawdowns: Although long
+observation periods reduce daily volatility, they increase the risk
+of extreme declines. This may be because long observation periods
+make investors react more slowly to market turns, causing downtrends
+to last longer and market reversals to be slower. Short observation
+periods may cause the market to recover from declines faster and
+trend reversals to be more frequent.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">C.&nbsp;Longer
+observation periods reduce market efficiency: As the observation
+period increases, the deviation between price and underlying value
+increases, indicating that the ability of market prices to reflect
+underlying value decreases.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">D.&nbsp;Under
+all observation period settings, the volatility is greater when the
+market is falling than when it is rising: This asymmetry becomes more
+obvious as the observation period increases, reflecting the
+behavioral characteristics of investors who are more sensitive when
+facing losses than when facing gains.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="3" style="font-size: 12pt">E.&nbsp;Short-term
+observation periods enable market prices to better follow changes in
+underlying values </font></font>​​<font face="Aptos"><font size="3" style="font-size: 12pt">and
+form trends that are more consistent with underlying values. As the
+observation period increases, the correlation between price and value
+decreases and the deviation increases, indicating that long-term
+observation periods may cause market prices to form trends that are
+inconsistent with underlying values.</font></font></span></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>3.&nbsp;&nbsp;&nbsp;Trend
+Investors</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+this section, we analyze the impact of the trend period configuration
+of&nbsp;TrendInvestor&nbsp;on the stock market simulation. By
+running&nbsp;20&nbsp;Monte Carlo simulations
+(&nbsp;MC_simulation_trend_period.py&nbsp;), we compared three
+different trend period group configurations:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Short-term
+Group&nbsp;:&nbsp;Trend investors using&nbsp;5-day,&nbsp;7-day
+and&nbsp;10-day moving averages</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Medium-term
+Group&nbsp;:&nbsp;Trend investors using&nbsp;30&nbsp;-day,&nbsp;45-&nbsp;day
+and&nbsp;60&nbsp;-day moving averages</font></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Liberation Serif, serif"><span lang="en-US">-&nbsp;<font face="Aptos"><font size="3" style="font-size: 12pt">Long-term
+Group&nbsp;:&nbsp;Trend investors using&nbsp;120&nbsp;-day,&nbsp;160-&nbsp;day
+and&nbsp;200-&nbsp;day moving averages</font></font></span></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+observation period of ChaseInvestor&nbsp;is fixed to&nbsp;10&nbsp;in
+all simulations&nbsp;.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice39513.png" name="图像38" align="bottom" width="553" height="259" border="0"/>
+
+&nbsp;</p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice39515.png" name="图像39" align="bottom" width="263" height="125" border="0"/>
+
+<img src="God's%20Dice.files/God's%20Dice39516.png" name="图像40" align="bottom" width="284" height="134" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;30</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">According
+to the operation result data, we can roughly analyze the following
+conclusions:</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">i.&nbsp;Volatility
+analysis: The market volatility generated by short-term trend
+investors is significantly lower than that of medium-term and
+long-term trend investors. There is a certain relationship between
+volatility and trend cycle, although it is not necessarily a simple
+linear relationship, but in general, short-term trend investors can
+generate lower market volatility.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">ii.&nbsp;Drawdown
+analysis: The maximum drawdown generated by short-term trend
+investors is significantly smaller than that of medium-term and
+long-term trend investors; the maximum drawdown standard deviation
+generated by long-term trend investors is the smallest, indicating
+that their drawdown pattern is more stable and&nbsp;predictable&nbsp;.
+Medium-term trend investors tend to generate the largest drawdown and
+the highest drawdown standard deviation.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">iii.&nbsp;Analysis
+of the relationship between price and value: In the market where only
+short-term trend investors participate, the correlation between price
+and true value is the highest, indicating that short-term trend
+tracking may more effectively reflect fundamental value; the average
+deviation between price and value generated by medium-term trend
+investors is the smallest, indicating that medium-term trends may be
+more efficient in price discovery; under long-term trend investors,
+the correlation between price and value is the lowest and the
+deviation is higher, indicating that long-term trend tracking may
+lead&nbsp;to&nbsp;a certain degree of disconnection between price and
+fundamental value.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">iv.&nbsp;Market
+stability: Simulations with only short-term trend investors produced
+lower market volatility and maximum drawdowns, suggesting that
+short-term trend following may contribute to market stability. This
+finding is contrary to the conventional wisdom that short-term
+trading increases volatility and warrants further study. One possible
+explanation is that short-term trend investors are able to react more
+quickly to price deviations, thus reducing the likelihood of large
+fluctuations.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">v.&nbsp;Market
+asymmetry: Under different simulation parameter settings, the market
+may show different volatility asymmetry. In some cases, the downward
+volatility may be greater than the upward volatility, while in other
+cases, the upward volatility may be greater than the downward
+volatility. This change in asymmetry indicates that the market
+volatility characteristics are sensitive to parameter settings and
+need to be further studied in different market environments.</span></font></font></p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Aptos"><font size="3" style="font-size: 12pt"><span lang="en-US">vi.&nbsp;Investment
+strategy implications: Combining short-term and medium-term trend
+signals may be the optimal investment strategy. Short-term signals
+provide higher value relevance and lower volatility, while
+medium-term signals provide lower price deviation. In terms of risk
+management, strategies should be adjusted according to the dominant
+trend investors in the market, especially in markets dominated by
+medium-term trend investors, and it is necessary to be prepared to
+deal with higher volatility and greater drawdown risks.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">These
+conclusions show that the moving average period used by trend
+investors has a significant impact on market behavior, and trend
+investors with different periods have their own advantages and
+disadvantages in terms of market stability, price discovery and risk
+characteristics.</span></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>VIII.&nbsp;Trader’s
+Profit Expectation</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+this section, we will observe the performance of various investments
+of market traders in the
+model.&nbsp;MC_simulation_asset_return_analysis_1.2.py&nbsp;This test
+conducted&nbsp;400&nbsp;Monte Carlo simulations&nbsp;for a period
+of&nbsp;1200 days, and the transaction fee rate was set to&nbsp;0.1%&nbsp;for
+both buying and selling . Each simulation used a different random
+seed to ensure the comprehensiveness and representativeness of the
+test. The investor configuration is shown in the following table:</span></font></font></p>
+<center>
+	<table cellpadding="2" cellspacing="0">
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border: 1.00pt solid #393b40; padding: 0.16cm 0.34cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>Investor
+				Type</b></span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>quantity</b></span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.16cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p align="center">
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>Features</b></span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">ValueInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Trading
+				based on value deviation, with a standard deviation of&nbsp;0.30</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">ChaseInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Buy
+				high and sell low, observation period is random&nbsp;(5-20&nbsp;days&nbsp;)</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">TrendInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Based
+				on moving average crossover signals, the period is distributed
+				between&nbsp;5-200&nbsp;days</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">RandomInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Random
+				trading decisions</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">NeverStopLossInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">10</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Do
+				not set a stop loss and continue to hold until the profit target
+				is reached</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">BottomFishingInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">10</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Bottom-picking
+				strategy, buy after a continuous decline</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">InsiderInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">5</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Insider
+				traders can predict changes in value</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="169" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0.34cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">MessageInvestor</span></font></font></p>
+			</td>
+			<td width="103" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">5</span></font></font></p>
+			</td>
+			<td width="283" bgcolor="#ffffff" style="background: #ffffff; border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.16cm; padding-left: 0cm; padding-right: 0.34cm"><p>
+				<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">News
+				investors, delayed in learning about value changes</span></font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">The
+upper graph below shows the average asset appreciation percentage
+change of various investors during the simulation period, with the
+horizontal axis being trading days and the vertical axis being asset
+appreciation percentage. The lower graph shows the total return&nbsp;and
+annualized return&nbsp;comparison of various investors, with the blue
+column being the total return&nbsp;(%)&nbsp;and the red&nbsp;column
+being the annualized&nbsp;return&nbsp;(%)&nbsp;[Note: the annualized
+return&nbsp;is calculated based on the assumption of&nbsp;250&nbsp;trading
+days&nbsp;/ year].</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice44589.png" name="图像41" align="bottom" width="507" height="290" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;30</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice44601.png" name="图像42" align="bottom" width="503" height="287" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;30</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">We
+rank the performance of the investors assumed in this model based on
+the size of their returns:</span></font></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">1.&nbsp;ChaseInvestor</font></font>​​​</span></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">2.&nbsp;Bottom&nbsp;Fishing&nbsp;Investor</font></font>​</span></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">3.&nbsp;Value&nbsp;Investor</font></font>​​</span></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">4.&nbsp;InsiderInvestor</font></font>​​​</span></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">5.&nbsp;MessageInvestor</font></font>​​​</span></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">6.&nbsp;NeverStopLossInvestor</font></font>​​​</span></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">7.&nbsp;TrendInvestor</font></font>​​​</span></font></p>
+<p align="left" style="text-indent: -0.64cm; margin-left: 1.27cm; line-height: 114%; margin-bottom: 0.28cm">
+<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">8.&nbsp;RandomInvestor&nbsp;follows&nbsp;market&nbsp;sentiment</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">This
+result is quite different from what we intuitively imagine or think,
+especially those who chase ups and downs are far ahead. This result
+is only the test performance of our model, which is not equivalent to
+the actual market situation. There are the following differences
+between the model and the actual market:</span></font></font></p>
+<p align="left" style="text-indent: -0.64cm; margin-left: 1.27cm; line-height: 114%; margin-bottom: 0.28cm">
+<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">1.&nbsp;The
+model only simulates a limited number of representative investor
+types, and there may be countless types of investors in the actual
+market;</span></font></font></p>
+<p align="left" style="text-indent: -0.64cm; margin-left: 1.27cm; line-height: 114%; margin-bottom: 0.28cm">
+<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">2.&nbsp;The
+number of investors in the model is small, and the proportion is
+arbitrarily set by us in the absence of data, and is not the same as
+the actual market.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Therefore,
+when we have more actual market data, we may be able to obtain test
+data that is closer to the actual market. The following two figures
+show the impact of transaction fees on market profitability. When we
+increase the buy and sell fees to&nbsp;1%&nbsp;, although the impact
+on the average market volatility is not significant as shown above,
+the return rate for various market traders is greatly reduced, which
+is consistent with our intuitive feeling.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice45964.png" name="图像43" align="bottom" width="528" height="302" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;31</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice45976.png" name="图像44" align="bottom" width="535" height="306" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;32</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">MC_simulation_asset_return_analysis_1.3.py&nbsp;is&nbsp;modified
+from&nbsp;MC_simulation_asset_return_analysis_1.2.py&nbsp;. The Monte
+Carlo method test method remains unchanged, all trader settings and
+parameters remain unchanged, and the transaction operation remains
+unchanged, but we only focus on the average asset curve, total return
+and annualized rate of return of investors with
+different<br/>
+cycle&nbsp;trends&nbsp;.</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice46382.png" name="图像45" align="bottom" width="535" height="306" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;33</span></font></font></p>
+<p align="center"><img src="God's%20Dice.files/God's%20Dice46394.png" name="图像46" align="bottom" width="535" height="306" border="0"/>
+
+&nbsp;</p>
+<p align="center"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Figure&nbsp;34</span></font></font></p>
+<p align="center">&nbsp;</p>
+<p style="text-indent: -0.52cm; margin-left: 0.52cm"><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US"><b>IX.&nbsp;Conclusion</b></span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">When
+we observe the trend of individual stocks, due to the randomness of
+the participants' behavior and the various events and information
+that occur randomly and affect the valuation, individual stocks show
+the characteristics of random walks. The individual stock trend
+sequence we observe is just a random event (in the sense of
+probability theory), one of thousands of possibilities. Because we
+cannot go back to the past and do it again, we cannot travel through
+parallel universes to observe. In this world, we can only see a
+random sequence composed of various coincidences, which belongs to a
+sample in the infinite sample space.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Through
+behavioral-based models and analysis methods, we can discover the
+truth of the market to the greatest extent, because we can use
+probability theory and statistical tools to summarize and discover
+the essence of the problem. We do not need to pursue the ability to
+predict market trends, because we cannot do it, but we can discover
+statistical regularity and effective and lasting profit models. Many
+quantitative investors (including me in the past) fall into this
+misunderstanding, hoping to derive a profitable method from
+historical data, but often through a lot of calculations, what they
+get may only be a survivor bias based on a random event, lacking
+broad adaptability. We&nbsp;are fortunate to have found&nbsp;this
+lucky person who dodged countless bullets, but who can predict
+whether the next bullet will end everything.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Let's
+go back to the model in this article and review previous work:</span></font></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">1.&nbsp;We
+simulated a stock market price series based on the behavior of market
+participants, and this price series conforms to the characteristics
+of random walk. In this step, we put forward the most important point
+of this article:&nbsp;</font></font><font face="Aptos"><font size="2" style="font-size: 11pt"><u>the
+various random behaviors of stock market participants are the main
+reason for the randomness of stock price trends, rather than being
+driven solely by unpredictable economic data, political events and
+other information as stated in the efficient market hypothesis and
+random walk theory.</u></font></font></span></font></p>
+<p align="left" style="line-height: 114%; text-indent: -0.64cm; margin-left: 1.27cm; margin-bottom: 0.28cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Aptos"><font size="2" style="font-size: 11pt">2.&nbsp;In
+this model, we verified the existence of the butterfly effect. We
+also simulated the butterfly effect caused by changes in closing
+prices, participation in transactions, etc. In a series of
+simulations, we obtained some interesting findings, such as: &quot;&nbsp;</font></font><font face="Aptos"><font size="2" style="font-size: 11pt"><u>Even
+a small amount of capital access can cause the future trend of the
+stock market&nbsp;</u></font></font><font face="Aptos"><font size="2" style="font-size: 11pt">&quot;&nbsp;,
+and the most interesting one is: &quot;&nbsp;</font></font><font face="Aptos"><font size="2" style="font-size: 11pt"><u>Regardless
+of whether the transaction is completed or not, as long as you
+participate in the market, it will affect the future price
+sequence</u></font></font>&nbsp;<font face="Aptos"><font size="2" style="font-size: 11pt">.&quot;</font></font></span></font></p>
+<p align="left" style="text-indent: -0.64cm; margin-left: 1.27cm; line-height: 114%; margin-bottom: 0.28cm">
+<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">3.&nbsp;Due
+to the randomness of price series, we use Monte Carlo method for
+analysis.</span></font></font></p>
+<p align="left" style="text-indent: -0.64cm; margin-left: 1.27cm; line-height: 114%; margin-bottom: 0.28cm">
+<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">4.&nbsp;We
+explored the impact of funding on the market.</span></font></font></p>
+<p align="left" style="text-indent: -0.64cm; margin-left: 1.27cm; line-height: 114%; margin-bottom: 0.28cm">
+<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">5.&nbsp;We
+explored the impact on the market when the three main types of
+investors in this model (value investors, rising and falling
+investors, and trend investors) adopt different operating parameters.</span></font></font></p>
+<p align="left" style="text-indent: -0.64cm; margin-left: 1.27cm; line-height: 114%; margin-bottom: 0.28cm">
+<font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">6.&nbsp;We
+simulated the changes in the asset curves of all investors in this
+model and understood their returns.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">In
+the model of this article, although all of our market participants
+have a certain realistic basis, they are all imaginary. Their
+proportion in the market, the funds they hold, and all their
+behaviors are set arbitrarily, so the results and findings in the
+simulation are only for reference and may not necessarily reflect the
+real market. But in today's big data, each user's fund holding data
+and buying and selling behavior data are stored in the database. If
+we get such data, we can train a neural network model, the input is
+market environment and information data, and the output is the user's
+behavior probability (the probability of trading at a certain time
+under certain conditions). In this way, using the model of this
+article, we can get as close to the truth as possible, discover the
+rules, find profit opportunities, or conduct market regulation.
+However, due to the existence of the butterfly effect, we should not
+expect to accurately predict future stock prices or trends, because
+it is impossible to do so. I feel that for quantitative investors,
+similar models can also be combined with big data through
+reinforcement learning methods to train their own profit&nbsp;agents&nbsp;and
+truly defeat the market.</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Finally,
+I still want to make a statement: the above model was independently
+established based on my hobby of exploring the laws of market
+operation and my superficial understanding of economic theory. It
+seems to be able to reflect the laws of the market to a certain
+extent. Some of them&nbsp;fit&nbsp;the market phenomena, while others
+do not (such as the relationship between quantity and price). It
+seems that some laws can be summarized, but they are a bit specious.
+In view of my limited academic ability and limited cognition, the
+model is too simplified and has too many assumptions based on daily
+experience. Therefore, the model can only be regarded as an
+interesting experimental game or a teaching tool. In addition, my
+program development ability is also relatively limited. Many codes
+are generated by&nbsp;AI&nbsp;. Perhaps a flaw in a code may overturn
+all the conclusions. The number of running tests of this model under
+various conditions is not enough, and there is not enough data to
+summarize. Some of the conclusions involved in the article can only
+be called conjectures, which may not be enough to fully explain and
+understand the market. Therefore, I open source the various
+evolutionary code versions here for like-minded people to play with
+and improve together.</span></font></font></p>
+<p>&nbsp;</p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Yichong</span></font></font></p>
+<p><font face="Aptos"><font size="2" style="font-size: 11pt"><span lang="en-US">Completed&nbsp;on&nbsp;May&nbsp;13&nbsp;,&nbsp;2025</span></font></font></p>
+<p>&nbsp;</p>
+</body>
+</html>

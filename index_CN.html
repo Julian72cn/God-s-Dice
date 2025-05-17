@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 25.2.3.2 (Windows)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="2025-05-16T16:58:59.231154900"/>
+	<meta name="Originator" content="Microsoft Word 15"/>
+	<meta name="ProgId" content="Word.Document"/>
+	<meta name="created" content="00:00:00">
+	<style type="text/css">
+		td p { color: #000000 }
+		p { color: #000000 }
+		body {
+			width: 800px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	</style>
+</head>
+<body lang="zh-CN" text="#000000" dir="ltr" style="border: none; padding: 0cm"><p align="center" style="line-height: 113%"><a name="_Hlk197532843"></a><a name="_Hlk197718922"></a>
+<font face="微软雅黑 Light, sans-serif"><font size="4" style="font-size: 16pt"><b>上帝的骰子</b></font></font></p>
+<p>&nbsp;</p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">在《股市的游戏》一文中，我们叙述了构建简化的股市交易模拟系统的过程。在这个模拟系统中：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">我们从交易者行为特征出发，加入了若干种投资者，包括：价值投资者、趋势投资者、追涨杀跌者、随机投资者、永不止损投资者、抄底投资者、消息投资者。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">在交易上，我们仅采用了一次集合竞价的方式来模拟每天的交易，生成价格序列和交易量序列，观察市场变化情况。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">从模拟结果的输出上，我们可以观察到股票价格和交易量的波动情况，以及每类投资者的资产、现金、持仓的平均变化情况。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">我们加入了向市场注入或抽离资金的功能，并加入了交易手续费的情况，可以观察市场整体资金变化对交易的影响。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">接下来，我们将会继续这个游戏，游戏会更加仿真，并探讨一些《股市的游戏》没有讨论过的问题。</font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Times New Roman, serif"><span lang="en-US"><b>一、</b></span></font><font face="微软雅黑 Light, sans-serif"><b>模型的调整</b></font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">在开始新的话题之前，我们先对模型做些必要的调整：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">价值曲线序列方波改为预先生成方式，并且可以设置随机数种子来生成不同的价值曲线（以方便后面的测试和分析）；</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">为使得价值投资者的交易行为更加符合实际投资策略，修改价值投资者操作方式：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">他们会根据价格与估值的偏离程度调整持仓比例，价格接近估值时，持仓比例接近目标值（约</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">50%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）。当价格显著偏离估值时，持仓比例会相应调整，最终会满仓或空仓。不同投资者对价格偏离的容忍度不同，导致不同的最大偏离比例。不同投资者的目标持仓比例也不同，反映了不同的风险偏好。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">当价值曲线变化后，价值投资者不会立即对股票价值变化做出反应，而是有</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1-20</span></font></span></font><font face="微软雅黑 Light, sans-serif">天的滞后期才重新进行估值，所有投资者的估值偏差百分比整体服从均值为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0</span></font></span></font><font face="微软雅黑 Light, sans-serif">、标准差为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">15%</span></font></span></font><font face="微软雅黑 Light, sans-serif">（可设置）的正态分布。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">因为随机投资者容易受到市场情绪的影响，所以引入市场情绪指标，并且随机投资者的投资策略将受到这个指标的影响：他们的交易概率受市场情绪影响，情绪高涨时交易概率增加，反之减少；而他们的交易比例也受到市场情绪影响，情绪高涨时交易比例增大，反之减少。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">引入新的内幕交易者这种投资者：他们是一种能够提前公开信息获知股票价值变化（相当于利空或者利好消息）的投资者。我们假设他们有以下的特性：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">能够提前</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1-5</span></font></span></font><font face="微软雅黑 Light, sans-serif">天知道股票价值的变化方向；</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">当预知未来价值上涨时，他们进行买入操作；当预知未来价值下降时，他们进行卖出操作；</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">模拟中设定一定的止盈止损和持仓周期目标。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">代码</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">基于</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_ca_3.2.1.1.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">首先做了以上的修改，主要目的就是希望能更接近实际市场的情况。但该代码做的</font><u><font face="微软雅黑 Light, sans-serif">最大</font></u><font face="微软雅黑 Light, sans-serif">的调整如下：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">为最大可能性接近现实市场，每个交易日分为三个阶段：开盘、盘中、收盘；</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">开盘集合采用竞价：随机选择</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">30%-50%</span></font></span></font><font face="微软雅黑 Light, sans-serif">的订单参与开盘的集合竞价</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">盘中交易：最多进行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">100</span></font></span></font><font face="微软雅黑 Light, sans-serif">轮迭代，每轮随机选择</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">10%-30%</span></font></span></font><font face="微软雅黑 Light, sans-serif">的订单参与本轮撮合，未成交订单有</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">40%</span></font></span></font><font face="微软雅黑 Light, sans-serif">概率返回主订单列表，</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">30%</span></font></span></font><font face="微软雅黑 Light, sans-serif">概率进入收盘集合竞价，</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">30%</span></font></span></font><font face="微软雅黑 Light, sans-serif">概率取消</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">收盘采用集合竞价：所有剩余订单参与收盘集合竞价</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">5.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">撮合选择能够产生最大成交量的价格作为成交价，如果有多个价格产生相同的最大成交量，选择离上一次价格最近的价格</font></p>
+<p style="margin-left: 0.78cm"><font face="微软雅黑 Light, sans-serif">详细代码可见</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">，运行之后出现如下面图所示的运行结果：</font></p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1074"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN1300.png" name="图像1" align="bottom" width="517" height="115" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1073"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN1302.png" name="图像2" align="bottom" width="553" height="98" border="0"/>
+
+&nbsp;</p>
+<p style="margin-left: 0.78cm"><font face="微软雅黑 Light, sans-serif">上图第一张是</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">100</span></font></span></font><font face="微软雅黑 Light, sans-serif">天的一个运行模拟；上图第二张是</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1000</span></font></span></font><font face="微软雅黑 Light, sans-serif">天的运行模拟。</font></p>
+<p style="margin-left: 0.78cm">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Times New Roman, serif"><span lang="en-US"><b>二、</b></span></font><font face="微软雅黑 Light, sans-serif"><b>随机漫步</b></font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">爱因斯坦有句名言：“无论如何，我都确信，上帝不会掷骰子。”
+但现实世界很多方面恰恰相反，几乎一切都充满了不确定性，金融的世界更是如此。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">金融学中有一个和股票市场随机性相关的重要理论叫随机漫步理论（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Random
+Walk Theory</span></font></span></font><font face="微软雅黑 Light, sans-serif">），其主要观点如下：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">价格变动是随机的、不可预测的：随机漫步理论认为，股票价格的变动类似于“布朗运动”，即每一步的涨跌都是独立的，没有规律可循；由于市场信息是随机出现的（如经济数据、政治事件等），价格变化也是随机的，无法通过历史数据预测未来走势。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">市场是有效的，价格已反映所有信息：该理论基于有效市场假说（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Efficient
+Market Hypothesis,
+EMH</span></font></span></font><font face="微软雅黑 Light, sans-serif">），认为市场价格已经充分消化了所有公开信息，包括基本面、新闻、市场情绪等。因此，任何技术分析或基本面分析都无法持续战胜市场，因为价格已处于“合理”水平。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">主动投资难以持续跑赢市场，被动投资（如指数基金）更优：由于价格随机波动，基金经理或投资者的超额收益大多是运气而非技能；既然市场难以战胜，该理论建议投资者采取“买入并持有”策略。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">反对技术分析和趋势预测：随机漫步理论认为，技术分析（如</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">K</span></font></span></font><font face="微软雅黑 Light, sans-serif">线图、均线等）是无效的，因为价格变动没有记忆性，过去的走势不会影响未来。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">5.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">极端涨跌是少数，大部分股票波动有限：股票大幅上涨（如涨</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">4-5</span></font></span></font><font face="微软雅黑 Light, sans-serif">倍）或暴跌（如跌</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">99%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）的比例很低，大多数股票的波动范围在</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">±10%~30%</span></font></span></font><font face="微软雅黑 Light, sans-serif">之间，符合正态分布。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">在我们的项目里，正如前段所述，</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">对市场交易方式进行了调整，调整后的运行结果表现随机的特性。下图的三张图是</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">在没有改变任何参数其他参数的情况下运行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1000</span></font></span></font><font face="微软雅黑 Light, sans-serif">天的三次模拟，市场价格和成交量变化各不相同。</font></p>
+<p align="center"><a name="_x0000_i1072"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN2089.png" name="图像3" align="bottom" width="554" height="98" border="0"/>
+
+&nbsp;</p>
+<p align="center"><a name="_x0000_i1071"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN2091.png" name="图像4" align="bottom" width="554" height="102" border="0"/>
+
+&nbsp;</p>
+<p align="center"><a name="_x0000_i1070"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN2093.png" name="图像5" align="bottom" width="553" height="100" border="0"/>
+
+&nbsp;</p>
+<p align="center">&nbsp;</p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">如前所述，随机漫步理论认为由于市场信息是随机出现的（如经济数据、政治事件等），价格变化也是随机的。但我们从程序模拟的结果来看，我们不能排除股市参与者行为的随机性对市场的影响。经济数据和政治事件的发生频率远远小于股市参与者的随机行为的发生频率，股市参与者的各种行为时时刻刻都会发生，会对股市时时刻刻产生影响。如果交易者行为具有随机的特性，也必将导致股票价格的随机性。比如一个价值投资者在上日收盘做了买入决策，他可能在第二天的任何时候买入；一个趋势投资者也可能因为接了一个电话，延迟原本打算交易的时间……这时他们的对手交易者也就会不一样。一系列交易者随机行为的发生，将会导致日内的波动，最后导致收盘价具有随机性，而收盘价又会影响到一部分依靠收盘价序列做决策的投资者，从而改变其交易行为并影响第二天的交易。这样日复一日，即便没有经济数据和政治事件的影响，随机漫步仍会发生。当然突发的经济数据、政治事件，包括企业自身的利空利好因素的随机发生，也将影响到投资者的决策，最终通过他们行为的改变，会给市场带来价格波动。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">随机漫步理论是通过观测现实世界的市场而总结分析的出来的理论，就会有一个问题：由于价格序列的随机性，我们得到的价格序列只是无数可能的价格序列中的一条序列，这条序列是由无数的巧合偶合而成的。各种因素都会对股市价格产生影响，但我们仅凭这条现有序列就很难分别分析这些因素各自带来的影响。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">程序</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">根据一些假设，可以模拟出很多股票价格的随机序列，然后我们就可以使用处理随机序列的数学方法来处理他们。我们需要强调的是这里提供了基于行为金融学的一种系统性的股市（或者其他金融系统）思维、研究和分析的方法，目前阶段不要过分关注市场参与者假设及其数据本身是否绝对正确：程序中的假设的参与者虽然以现实为基础，但也肯定和现实市场差异巨大。但我在想，如果我们能从股市大数据中获得更多的投资人投资风格或者习惯信息（比如：资金多少、是技术派还是基本面派、喜欢什么时间点买入或者卖出等），说不定就能获得更加接近现实的模拟。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Times New Roman, serif"><span lang="en-US"><b>三、</b></span></font><font face="微软雅黑 Light, sans-serif"><b>布朗运动</b></font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">在这个章节中，我们将讨论我们模拟程序生成的价格曲线是否符合几何布朗运动。我们对</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">程序进行了少许改动，目的是为每个伪随机数的生成设定一个随机数种子，以期做到复现，生成的程序为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.1.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">。另外，我们写了布朗运动检测程序——</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">brownian_motion_test_1.0.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">。在这里模拟股票价格</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">2000</span></font></span></font><font face="微软雅黑 Light, sans-serif">天的数据变化，检验报告如下：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">正态性检验：非常好地通过了所有正态性检验</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Shapiro-Wilk
+</span></font></span></font><font face="微软雅黑 Light, sans-serif">检验：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">p</span></font></span></font><font face="微软雅黑 Light, sans-serif">值为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.428901
+&gt; 0.05</span></font></span></font><font face="微软雅黑 Light, sans-serif">，表明收益率分布不能拒绝正态分布假设</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Jarque-Bera
+</span></font></span></font><font face="微软雅黑 Light, sans-serif">检验：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">p</span></font></span></font><font face="微软雅黑 Light, sans-serif">值为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.291005
+&gt; 0.05</span></font></span></font><font face="微软雅黑 Light, sans-serif">，同样支持收益率服从正态分布</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Lilliefors
+</span></font></span></font><font face="微软雅黑 Light, sans-serif">检验：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">p</span></font></span></font><font face="微软雅黑 Light, sans-serif">值为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.515399
+&gt; 0.05</span></font></span></font><font face="微软雅黑 Light, sans-serif">，进一步确认收益率服从正态分布</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">偏度：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">-0.0857</span></font></span></font><font face="微软雅黑 Light, sans-serif">，接近于</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0</span></font></span></font><font face="微软雅黑 Light, sans-serif">，表明分布基本对称，略微偏向左侧</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">超额峰度：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">-0.0159</span></font></span></font><font face="微软雅黑 Light, sans-serif">，非常接近于</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0</span></font></span></font><font face="微软雅黑 Light, sans-serif">，表明分布的尾部与正态分布非常相似</font></p>
+<p style="margin-left: 1.55cm"><font face="微软雅黑 Light, sans-serif">结论：非常好地通过了所有正态性检验。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">自相关性检验：
+</font>
+</p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Ljung-Box</span></font></span></font><font face="微软雅黑 Light, sans-serif">检验：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">p</span></font></span></font><font face="微软雅黑 Light, sans-serif">值为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.230261
+&gt; 0.05</span></font></span></font><font face="微软雅黑 Light, sans-serif">，表明收益率之间没有显著的自相关性</font></p>
+<p style="margin-left: 1.55cm"><font face="微软雅黑 Light, sans-serif">结论：通过了自相关性检验，表明收益率之间没有显著的相关性。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">方差</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">-</span></font></span></font><font face="微软雅黑 Light, sans-serif">时间关系检验：
+</font>
+</p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">斜率（对数</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">-</span></font></span></font><font face="微软雅黑 Light, sans-serif">对数坐标）：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">-0.0217</span></font></span></font><font face="微软雅黑 Light, sans-serif">，理论值应为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.0</span></font></span></font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">R</span></font></span></font><font face="微软雅黑 Light, sans-serif">方：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.1012</span></font></span></font><font face="微软雅黑 Light, sans-serif">，拟合度较低</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">与理论值的偏差：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.0217</span></font></span></font><font face="微软雅黑 Light, sans-serif">，偏差较大</font></p>
+<p style="margin-left: 1.55cm"><font face="微软雅黑 Light, sans-serif">结论：理论上应为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.0</span></font></span></font><font face="微软雅黑 Light, sans-serif">，唯一一个不符合布朗运动特性的检验。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">随机游走检验：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">ADF
+</span></font></span></font><font face="微软雅黑 Light, sans-serif">检验：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">p</span></font></span></font><font face="微软雅黑 Light, sans-serif">值为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.981601
+&gt; 0.05 </span></font></span></font>
+</p>
+<p style="margin-left: 1.55cm"><font face="微软雅黑 Light, sans-serif">结论：通过了随机游走检验，随机游走特性非常明显。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">5.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Hurst</span></font></span></font><font face="微软雅黑 Light, sans-serif">指数：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">值为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.4892</span></font></span></font><font face="微软雅黑 Light, sans-serif">，非常接近</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.5</span></font></span></font><font face="微软雅黑 Light, sans-serif">（布朗运动的理论值）</font></p>
+<p style="margin-left: 1.55cm"><font face="微软雅黑 Light, sans-serif">结论：非常接近理想的布朗运动，表现出轻微的反持续性。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">总结：模拟的股票价格数据也满足了</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5</span></font></span></font><font face="微软雅黑 Light, sans-serif">个条件中的</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">4</span></font></span></font><font face="微软雅黑 Light, sans-serif">个，因此结论是</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">价格序列强烈类似于布朗运动</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">。生成的价格曲线在更长的时间序列下表现出非常强的布朗运动特性，增加样本量（从</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">500</span></font></span></font><font face="微软雅黑 Light, sans-serif">到</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">2000</span></font></span></font><font face="微软雅黑 Light, sans-serif">）后，两种数据的布朗运动特性都变得更加明显，特别是随机游走特性和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Hurst</span></font></span></font><font face="微软雅黑 Light, sans-serif">指数。尽管存在方差</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">-</span></font></span></font><font face="微软雅黑 Light, sans-serif">时间关系的偏差，模拟股票价格数据仍然满足了布朗运动的大多数关键特性，表明该模型可以很好地用于金融市场模拟。对于未通过方差</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">-</span></font></span></font><font face="微软雅黑 Light, sans-serif">时间关系检验，这可能是由于：我们的检验方法可能存在问题；布朗运动的离散模拟本身可能导致这种偏差；可能需要更复杂的模型（如分数布朗运动）来更好地捕捉这种关系。</font></p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1069"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4018.png" name="图像6" align="bottom" width="494" height="247" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1">&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1">&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1068"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4022.png" name="图像7" align="bottom" width="521" height="203" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1067"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4024.png" name="图像8" align="bottom" width="403" height="312" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1066"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4026.png" name="图像9" align="bottom" width="475" height="250" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1065"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4028.png" name="图像10" align="bottom" width="486" height="248" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Times New Roman, serif"><span lang="en-US"><b>四、</b></span></font><span style="font-variant: normal">
+</span><font face="微软雅黑 Light, sans-serif"><b>蝴蝶效应</b></font></p>
+<p style="text-indent: 0.75cm; orphans: 1">“<font face="微软雅黑 Light, sans-serif">蝴蝶效应”最早由洛伦兹在</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1963</span></font></span></font><font face="微软雅黑 Light, sans-serif">年的研究中提出，源于他发现天气模型对初始条件的极端敏感性，这一发现后来被形象化为“巴西一只蝴蝶扇动翅膀，可能在太平洋引发台风”，强调小变化可能引发大结果。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">在股市等金融系统中，这一理论被用来描述市场对小事件的放大效应。研究表明，股市是一个开放系统，受多重因素影响，如经济数据、政治事件和投资者心理，这种系统特性使其易受蝴蝶效应的影响。行为金融学研究则认为投资者心理和偏见会影响市场，蝴蝶效应在此体现为，投资者情绪的小变化可能放大市场波动。下面我们则模拟三种情况：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US"><b>1.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>收盘价的改变：</b></font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">项目中的程序</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">butterfly_effect_simulation_1.0.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">则可以模拟蝴蝶效应这种现象。程序基于现有的</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.1.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">文件，通过修改指定日期（如</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">300</span></font></span></font><font face="微软雅黑 Light, sans-serif">天）的收盘价（改变比率分别为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.5%,
+1.5%, 4%, -0.5%, -1.5%,
+-4%</span></font></span></font><font face="微软雅黑 Light, sans-serif">），模拟某一天收尾行情因为某种原因发生突然变化，然后观察比较这种小变化对后续市场的影响。测试中设定随机数种子完全一致，其他的参数完全不变，仅观察收盘价微小波动对后继收盘价序列的影响。结果如下图所示：</font></p>
+<p align="center" style="line-height: 113%; text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1064"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4537.png" name="图像11" align="bottom" width="441" height="165" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="line-height: 113%; text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1063"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4539.png" name="图像12" align="bottom" width="524" height="412" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">统计表统计了这样一些信息：初始设定的百分比变化、最大差异、最终差异、平均差异、放大方向等。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">通过图形展示，我们可以观察到这样几个现象：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.26cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">相比黑色的基准线（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">300</span></font></span></font><font face="微软雅黑 Light, sans-serif">天</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0%</span></font></span></font><font face="微软雅黑 Light, sans-serif">偏移的价格曲线），其他价格曲线有着明显的不同，哪怕只有</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.5%</span></font></span></font><font face="微软雅黑 Light, sans-serif">的改变</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.26cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">后期的价格曲线的波动幅度和初始偏移关系不大</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.26cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">这几条价格曲线仍有追随价值曲线（灰色虚线）的运动趋势</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">下图则展示了一种更加极端的变化情况，价值曲线持续下跌后的各条修正过的价格曲线大幅偏离基准线的情况。</font></p>
+<p align="center" style="line-height: 113%; text-indent: 0.44cm; orphans: 1">
+&nbsp;</p>
+<p align="center" style="text-indent: 0.75cm; orphans: 1"><a name="_x0000_i1062"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN4759.png" name="图像13" align="bottom" width="492" height="390" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">通过修改程序，我们也可以模拟其他的内外环境的突然变化（哪怕小幅变化）给长期股价波动带来的影响。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US"><b>2.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>个体行为的影响——第一种情况</b></font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">我们这里模拟（程序</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">butterfly_effect_simulation_1.2.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">）单个投资者的突然参与，如何对整个市场产生长期影响。我们设计了一个突然参与交易的投资者（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Sudden
+Investor</span></font></span></font><font face="微软雅黑 Light, sans-serif">），该投资者在指定交易日（第</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">300</span></font></span></font><font face="微软雅黑 Light, sans-serif">天）以略高于当时市场价格（溢价</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）的价格买入股票，然后观察这种干预对后续市场价格走势的影响。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">我们进行了多组模拟，每组模拟中突然投资者的初始资金不同（从</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">300</span></font></span></font><font face="微软雅黑 Light, sans-serif">元到</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">100,000</span></font></span></font><font face="微软雅黑 Light, sans-serif">元不等），并与基准模拟（没有突然投资者参与）进行比较，以分析不同规模资金对市场的影响程度。</font></p>
+<center>
+	<table width="492" cellpadding="0" cellspacing="0">
+		<tr valign="top">
+			<td width="75" style="border: 1.00pt solid #000000; padding: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><b>投资者资金</b></font></font></p>
+			</td>
+			<td width="77" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><b>下单数量</b></font></font></p>
+			</td>
+			<td width="85" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><b>成交数量</b></font></font></p>
+			</td>
+			<td width="76" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><b>成交比例</b></font></font></p>
+			</td>
+			<td width="85" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><b>剩余现金</b></font></font></p>
+			</td>
+			<td width="95" style="border-top: 1.00pt solid #000000; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><b>成交状态</b></font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="75" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">300</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">3</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">3</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="76" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="right">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">100%</span></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">74.55</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="95" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">全部成交</font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="75" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">1,000</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">13</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">13</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="76" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="right">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">100%</span></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">23.06</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="95" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">全部成交</font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="75" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">5,000</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">65</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">65</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="76" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="right">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">100%</span></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">115.31</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="95" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">全部成交</font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="75" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">10,000</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">131</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">129</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="76" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="right">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">98.50%</span></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">22.46</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="95" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">部分成交</font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="75" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">20,000</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">263</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">155</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="76" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="right">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">58.90%</span></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">8,011.48</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="95" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">部分成交</font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="75" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">50,000</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">658</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">155</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="76" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="right">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">23.60%</span></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">38,011.48</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="95" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">部分成交</font></font></p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td width="75" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: 1.00pt solid #000000; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">100,000</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="77" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">1,317</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">155</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">股</font></font></font></p>
+			</td>
+			<td width="76" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="right">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">11.80%</span></font></font></p>
+			</td>
+			<td width="85" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="Liberation Serif, serif"><span lang="en-US"><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt"><span lang="en-US">88,011.48</span></font></font></font></span></font><font color="#000000"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">元</font></font></font></p>
+			</td>
+			<td width="95" style="border-top: none; border-bottom: 1.00pt solid #000000; border-left: none; border-right: 1.00pt solid #000000; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 9pt">部分成交</font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">由于市场参与者每个种类参与者数量比较小（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">100</span></font></span></font><font face="微软雅黑 Light, sans-serif">人），所以上表中，小额资金（≤</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5,000</span></font></span></font><font face="微软雅黑 Light, sans-serif">元）订单能够全部成交，更大的订单只有部分成交，当前规模的市场市场在最大可成交量上限约为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">155</span></font></span></font><font face="微软雅黑 Light, sans-serif">股。</font></p>
+<p align="center" style="margin-left: 0.78cm; orphans: 1"><a name="_x0000_i1061"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN5464.png" name="图像14" align="bottom" width="508" height="418" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">下图则是设定</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">2%</span></font></span></font><font face="微软雅黑 Light, sans-serif">溢价买入时的运行结果。</font></p>
+<p align="center" style="margin-left: 0.78cm; orphans: 1"><a name="_x0000_i1060"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN5486.png" name="图像15" align="bottom" width="502" height="418" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">下图则是设定</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1%</span></font></span></font><font face="微软雅黑 Light, sans-serif">溢价买入时的运行结果，成交记录显示，所有投资者都只买到了</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">2</span></font></span></font><font face="微软雅黑 Light, sans-serif">股。表明市场深度有限的情况下，市场中卖单有限，或者其他投资者的买单竞争，导致的即使提供更多资金，也无法买入更多股票。</font></p>
+<p align="center" style="margin-left: 0.78cm; orphans: 1"><a name="_x0000_i1059"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN5584.png" name="图像16" align="bottom" width="496" height="404" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">运行结果我们可以发现：①
+在所有情况下，突然投资者的参与都导致市场价格相对于基准模拟出现偏离，表明买入行为对市场价格有影响。②
+<u>即使是小额资金也能对市场产生显著影响，即使成交量只有两股也能对市场产生显著影响</u>。③
+初始干预导致的价格偏离在模拟结束时仍然存在，表明市场没有完全回归到无干预状态。④
+蝴蝶效应的强度和突发买入资金量的大小没有明显的关系。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">我们简单分析一下蝴蝶效应产生的可能原因或（或称为机制）：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">直接原因：</font>①
+<font face="微软雅黑 Light, sans-serif">价格发现：突然投资者以高于市场价格</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5%</span></font></span></font><font face="微软雅黑 Light, sans-serif">的溢价下单，直接提高了市场的买入压力，导致竞价中形成更高的成交价格。</font>②
+<font face="微软雅黑 Light, sans-serif">流动性吸收：投资者的买入订单吸收了市场上的部分卖单，减少了可供其他买家购买的股票数量，进一步推高价格。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">间接原因：</font>①
+<font face="微软雅黑 Light, sans-serif">投资者行为的改变：初始价格变化可能导致其他投资者（如趋势投资者、追涨杀跌投资者）改变其交易决策，形成连锁反应。</font>②
+<font face="微软雅黑 Light, sans-serif">技术指标的变化：价格变化影响了移动平均线等技术指标，进一步影响依赖这些指标的投资者的决策。</font>③
+<font face="微软雅黑 Light, sans-serif">市场情绪的传导：价格上涨可能被解读为积极信号，引发更多买入行为，形成正反馈循环。</font>④
+<font face="微软雅黑 Light, sans-serif">长期影响的持续：即使在突然投资者交易后很长时间，市场价格仍然与基准存在偏差，表明初始干预的影响通过市场机制被放大和延续。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">在</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">butterfly_effect_simulation_1.3.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">butterfly_effect_simulation_1.4.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">中，将市场中除了突然投资者</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(Sudden
+Investor)</span></font></span></font><font face="微软雅黑 Light, sans-serif">外的所有其他投资者数量放大</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">10</span></font></span></font><font face="微软雅黑 Light, sans-serif">和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">50</span></font></span></font><font face="微软雅黑 Light, sans-serif">倍，以研究在更大规模市场中，单个投资者的突然参与是否仍能产生显著的蝴蝶效应。实验保持了相同的随机数种子和其他参数设置，使结果可以与小规模市场进行直接比较。下面两图分别由</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.3</span></font></span></font><font face="微软雅黑 Light, sans-serif">版和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.4</span></font></span></font><font face="微软雅黑 Light, sans-serif">版程序生成：</font></p>
+<p align="center"><a name="_x0000_i1058"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN6484.png" name="图像17" align="bottom" width="490" height="396" border="0"/>
+
+&nbsp;</p>
+<p align="center"><a name="_x0000_i1057"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN6486.png" name="图像18" align="bottom" width="499" height="404" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">与小规模市场相比，大规模市场中的订单成交情况有显著变化——成交率提高，表明大规模市场的流动性显著提高。市场可以发现一些新的规律：①
+在大规模市场中，突然投资者能够产生的最大价格偏离普遍小于小规模市场，蝴蝶效应强度普遍减弱，表明市场规模与蝴蝶效应强度呈负相关关系。②
+资金量的影响比率（最大价差</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">/</span></font></span></font><font face="微软雅黑 Light, sans-serif">资金万元）在大规模市场中都有所降低，表明市场规模扩大后，单位资金的影响力减弱。③
+小额资金在大规模市场中仍能产生影响，并有相对更高的影响比率。④
+随着市场规模增加，蝴蝶效应的相对影响强度总体呈下降趋势，但下降速度不是线性的。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US"><b>3.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>个体行为的影响——第二种情况</b></font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">这是一个意外的发现，但非常有必要单独列出来。我们把</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">butterfly_effect_simulation_1.2.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">的买入溢价参数（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">price_premium</span></font></span></font><font face="微软雅黑 Light, sans-serif">）设为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0</span></font></span></font><font face="微软雅黑 Light, sans-serif">。运行后，所有投资者订单均未成交，但是运行结果是：市场价格仍然受到影响，显示出蝴蝶效应。</font></p>
+<p align="center"><a name="_x0000_i1056"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN6953.png" name="图像19" align="bottom" width="502" height="413" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">这个模拟表明了市场微观结构中价格形成机制的复杂性，以及投资者行为对市场的潜在影响，即使这些行为没有直接导致交易的执行：<u>市场价格不仅受实际交易的影响，也受潜在交易意愿的影响</u>。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">未成交订单影响市场的可能原因包括：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">订单簿影响：买单的存在改变了市场的供需平衡，影响了其他投资者的决策。在竞价机制中，即使订单未能成交，它也参与了价格发现过程。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">交易行为改变：从成交量的变化可以看出，单日投资者的参与改变了其他投资者的交易行为，即使单日投资者自身的订单没有成交。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">在现实市场中未成交订单影响市场的还可能有另外两个因素：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">信息传递：订单传递了投资意愿的信息，影响了其他投资者对市场的预期。特别是大额订单，可能被其他投资者视为市场信号。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Wingdings"><span lang="en-US">l</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">市场情绪传导：单个投资者的行为可能通过影响少数投资者，进而影响更多投资者，形成连锁反应。这或许是蝴蝶效应的另一个核心机制。</font></p>
+<p style="text-indent: 0.75cm; margin-left: 0.78cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">这个结果对现实市场的启示是：即使未成交的订单也可能通过影响其他市场参与者的行为而间接影响市场价格。这种</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">存在性影响</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">在高频交易和算法交易占主导地位的现代市场中尤为重要。</font></p>
+<p style="text-indent: 0.75cm; orphans: 1">&nbsp;</p>
+<p style="text-indent: 0.75cm; orphans: 1"><font face="微软雅黑 Light, sans-serif">综上所述，我们用模拟实验证实了股票市场中存在</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">蝴蝶效应</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">现象：一个投资者的突然参与，即使资金量很小，即便没有成交，也可能对市场价格产生长期、显著的影响。这种影响通过直接的价格发现机制和间接的投资者行为改变机制传导和放大，导致市场价格长期偏离无干预情况下的轨迹。也正如之前所说的那样：一只蝴蝶扇动翅膀，可能在太平洋引发台风。人们也常说：“雪崩的时候没有一片雪花是无辜的”。而在股市中，也同样如此。</font></p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Times New Roman, serif"><span lang="en-US"><b>五、</b></span></font><font face="微软雅黑 Light, sans-serif"><b>蒙特卡罗方法</b></font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">既然股票价格是随机序列，我们就可以用处理分析随机序列的方法来处理它。蒙特卡罗方法（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Monte
+Carlo
+Method</span></font></span></font><font face="微软雅黑 Light, sans-serif">）就是其中之一。蒙特卡洛方法是一种基于随机抽样的数值计算技术，它广泛用于模拟和分析随机序列（如金融时间序列、物理过程、工程系统等）。其核心思想是通过大量随机实验逼近真实分布或计算复杂数学问题：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">核心步骤</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">定义随机过程：明确待模拟的随机序列模型。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">生成随机样本：通过伪随机数生成器（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">PRNG</span></font></span></font><font face="微软雅黑 Light, sans-serif">）或准蒙特卡洛方法（如</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">Sobol</span></font></span></font><font face="微软雅黑 Light, sans-serif">序列）产生随机路径。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">计算统计量：对模拟结果进行统计分析（如均值、方差、分位数等）。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">收敛性检验：增加模拟次数以提高精度（大数定律保证收敛）。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2.</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">数学基础</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">大数定律：当模拟次数</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N→∞</span></font></span></font><font face="微软雅黑 Light, sans-serif">，样本均值趋近期望值：</font></p>
+<p style="margin-left: 2.33cm"><a name="_x0000_i1055"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN7942.png" name="图像20" align="bottom" width="143" height="46" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">中心极限定理：估计误差服从正态分布，可计算置信区间。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">到目前为止，我们其实完成了核心步骤的第一步，用市场参与者行为的简化假设和市场规则定义了随机过程。下面我们将实施</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">2-3</span></font></span></font><font face="微软雅黑 Light, sans-serif">步。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">下面两幅图由程序</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_1.0.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">生成（使用</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">main_OHLC_2.0.5.1.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">作为模块），是用蒙特卡罗方法模拟了在其他参数不变的情况下只改变市场随机数种子分别生成</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">20</span></font></span></font><font face="微软雅黑 Light, sans-serif">条和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">100</span></font></span></font><font face="微软雅黑 Light, sans-serif">条</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">800</span></font></span></font><font face="微软雅黑 Light, sans-serif">天收盘价曲线，得到的收盘价均值序列。我们可以观察到随着模拟次数的增加，均值曲线更加收敛。我们也可以观察到随机模拟的众多收盘价曲线存在大幅波动的现象。在这个案例中，样本均值曲线和股票价值曲线表现出很强的相关性。当然，之后我们可以计算期望值，并进行各种统计分析，但这不是本章节重点关注的内容。</font></p>
+<p align="center" style="text-indent: 0.74cm"><a name="_x0000_i1054"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8283.png" name="图像21" align="bottom" width="355" height="236" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.74cm"><a name="_x0000_i1053"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8285.png" name="图像22" align="bottom" width="340" height="229" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">下面这幅图由程序</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_1.1.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">生成，模拟了只保留价值曲线不变，其他随机数种子都随机变化生成</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">100</span></font></span></font><font face="微软雅黑 Light, sans-serif">条</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">800</span></font></span></font><font face="微软雅黑 Light, sans-serif">天收盘价曲线，得到的收敛的收盘价均值序列。我们可以观察这条曲线与上面只变更市场随机数生成的曲线相比，有细微变化，但总体差别不大。</font></p>
+<p align="center" style="text-indent: 0.74cm"><a name="_x0000_i1052"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8417.png" name="图像23" align="bottom" width="379" height="259" border="0"/>
+
+&nbsp;</p>
+<p>&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><span lang="en-US"><b>六、</b></span><font face="微软雅黑 Light, sans-serif"><b>重新审视——资金面的影响</b></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US"><b>1.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>资金注入和抽离</b></font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">在</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_1.2.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">中，添加了资金注入或抽离市场的功能，并实现了蒙特卡洛模拟来分析资金面对股价均值的影响。程序比较不同资金变动策略的影响，支持多种资金变动策略的并行模拟，返回每种策略的平均收盘价格序列和真实价值曲线。在程序中，我们定义了多种资金变动策略，包括：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">基准情况（无资金变动）</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">单次资金注入（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">10%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">单次资金抽离（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">10%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">大规模资金注入（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">50%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">大规模资金抽离（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">50%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">分批资金注入（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">4</span></font></span></font><font face="微软雅黑 Light, sans-serif">次，每次</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">分批资金抽离（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">4</span></font></span></font><font face="微软雅黑 Light, sans-serif">次，每次</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">先注入后抽离（先注入</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">20%</span></font></span></font><font face="微软雅黑 Light, sans-serif">，后抽离</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">20%</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">这个修改后的程序可以帮助分析不同资金流动情况对股票市场价格的影响，特别是：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">资金注入是否会导致股价上涨</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">资金抽离是否会导致股价下跌</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">不同规模和时机的资金变动对市场的影响差异</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">资金变动对市场价格的短期和长期影响</font></p>
+<p style="margin-left: 0.78cm">&nbsp;</p>
+<p align="center"><a name="_x0000_i1051"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN8805.png" name="图像24" align="bottom" width="553" height="361" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.85cm; orphans: 2"><a name="_x0000_i1050"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8807.png" name="图像25" align="bottom" width="527" height="356" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.42cm; orphans: 1"><a name="_x0000_i1049"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8809.png" name="图像26" align="bottom" width="541" height="348" border="0"/>
+
+&nbsp;</p>
+<p style="margin-left: 0.78cm">&nbsp;</p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1048"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8812.png" name="图像27" align="bottom" width="523" height="352" border="0"/>
+
+&nbsp;</p>
+<p align="center"><a name="_x0000_i1047"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN8814.png" name="图像28" align="bottom" width="554" height="347" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.39cm; orphans: 1"><a name="_x0000_i1046"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8816.png" name="图像29" align="bottom" width="531" height="355" border="0"/>
+
+&nbsp;</p>
+<p align="center"><a name="_x0000_i1045"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN8818.png" name="图像30" align="bottom" width="552" height="366" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.39cm; orphans: 1"><a name="_x0000_i1044"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN8820.png" name="图像31" align="bottom" width="539" height="358" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">通过上述的模拟结果（每轮</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">30</span></font></span></font><font face="微软雅黑 Light, sans-serif">次模拟），我们可以观察资金的注入和抽离的确会给市场价格的均值带来明显的影响，影响力度和注入或抽取资金的量呈现明显的相关性。影响周期不局限短期，也会对市场有长期的影响。而从单个模拟事件来看，因为蝴蝶效应的存在，在注入资金之后甚至有可能掀起市场的惊涛骇浪。</font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">下面则对比了逐步增加资金和突然增加资金的区别。同样增加</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">50%</span></font></span></font><font face="微软雅黑 Light, sans-serif">的资金，一种是一次注入，一种是分</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5</span></font></span></font><font face="微软雅黑 Light, sans-serif">次注入（代码见</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_1.3.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">）。从结果来看，一次性注入资金和分批注入资金对股价都有正向的影响，但前者可能会引起更剧烈的市场波动。</font></p>
+<p align="center"><a name="_x0000_i1043"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN9088.png" name="图像32" align="bottom" width="551" height="346" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="text-indent: 0.42cm; orphans: 1"><a name="_x0000_i1042"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN9090.png" name="图像33" align="bottom" width="540" height="359" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.42cm; orphans: 1">&nbsp;</p>
+<p align="center"><a name="_x0000_i1041"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN9093.png" name="图像34" align="bottom" width="524" height="327" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US"><b>2.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>交易成本对市场的影响</b></font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">程序</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_1.4.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">则模拟了不同的交易成本对市场的影响情况。下图从上至下模拟四种交易成本情况：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">无交易成本：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">buy_fee_rate</span></font><font face="Liberation Serif, serif"><span lang="en-US">
+</span></font><font face="微软雅黑 Light, sans-serif"><span lang="en-US">=
+0, sell_fee_rate = 0</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">低交易成本：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">buy_fee_rate</span></font><font face="Liberation Serif, serif"><span lang="en-US">
+</span></font><font face="微软雅黑 Light, sans-serif"><span lang="en-US">=
+0.0003, sell_fee_rate = 0.0003 (0.03%)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">中交易成本：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">buy_fee_rate</span></font><font face="Liberation Serif, serif"><span lang="en-US">
+</span></font><font face="微软雅黑 Light, sans-serif"><span lang="en-US">=
+0.001, sell_fee_rate = 0.001 (0.1%)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.54cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">高交易成本：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">buy_fee_rate</span></font><font face="Liberation Serif, serif"><span lang="en-US">
+</span></font><font face="微软雅黑 Light, sans-serif"><span lang="en-US">=
+0.01, sell_fee_rate = 0.01 (1%)</span></font></span></font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">从图中我们可以直观感受到四种情况的股价均值曲线差异很小。</font></p>
+<p align="center" style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><a name="_x0000_i1040"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN9407.png" name="图像35" align="bottom" width="516" height="465" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><span lang="en-US"><b>七、</b></span><font face="微软雅黑 Light, sans-serif"><b>重新审视——投资者行为的影响</b></font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US"><b>1.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>价值投资者</b></font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_bias_std.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">尝试研究价值投资者的偏差标准差</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(bias_percent_std)</span></font></span></font><font face="微软雅黑 Light, sans-serif">参数对市场的影响。通过运行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">20</span></font></span></font><font face="微软雅黑 Light, sans-serif">次蒙特卡洛模拟，我们比较了三种不同的</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">bias_percent_std</span></font></span></font><font face="微软雅黑 Light, sans-serif">设置的情况：</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.15</span></font></span></font><font face="微软雅黑 Light, sans-serif">（低）、</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.30</span></font></span></font><font face="微软雅黑 Light, sans-serif">（中）和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.50</span></font></span></font><font face="微软雅黑 Light, sans-serif">（高）。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">总体波动性指标</font></p>
+<center>
+	<table width="501" cellpadding="0" cellspacing="0">
+		<tr>
+			<td width="132" style="border: 1.00pt solid #393b40; padding: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>指标</b></font></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>低偏差标准差</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+&nbsp;(0.15)</b></span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>中偏差标准差
+				</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+(0.30)</b></span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>高偏差标准差
+				</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+(0.50)</b></span></font></font></span></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">平均日波动率
+				</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">(%)</span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">1.3729</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">1.4467</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">1.5289</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">波动率标准差
+				</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">(%)</span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.0409</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.0263</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.0362</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">上行波动率
+				</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">(%)</span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.7386</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.7831</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.8215</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif">下行波动率 </font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(%)</span></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.7595</span></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.7914</span></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.8433</span></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">最大回撤分析</font></p>
+<center>
+	<table width="501" cellpadding="0" cellspacing="0">
+		<tr>
+			<td width="142" style="border: 1.00pt solid #393b40; padding: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>指标</b></font></font></p>
+			</td>
+			<td width="113" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>低偏差标准差
+				</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+(0.15)</b></span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>中偏差标准差
+				</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+(0.30)</b></span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>高偏差标准差</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+&nbsp;(0.50)</b></span></font></font></span></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="142" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">平均最大回撤
+				</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">(%)</span></font></font></span></font></p>
+			</td>
+			<td width="113" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">64.9730</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">65.7613</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">66.2239</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="142" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">最大回撤标准差
+				</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">(%)</span></font></font></span></font></p>
+			</td>
+			<td width="113" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">5.5588</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">4.0447</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">4.5874</span></font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">价格与价值的关系分析</font></p>
+<center>
+	<table width="501" cellpadding="0" cellspacing="0">
+		<tr>
+			<td width="132" style="border: 1.00pt solid #393b40; padding: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>指标</b></font></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>低偏差标准差
+				</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+(0.15)</b></span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>中偏差标准差
+				</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b><br/>
+(0.30)</b></span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>高偏差标准差
+				</b></font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US"><b>(0.50)</b></span></font></font></span></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">价格与价值的相关性</font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.9528</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.9323</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.8822</span></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="132" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">价格与价值的平均偏离度
+				</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">(%)</span></font></font></span></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">10.8261</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">12.8510</span></font></font></p>
+			</td>
+			<td width="123" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">15.4079</span></font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p>&nbsp;</p>
+<p align="center"><a name="_x0000_i1039"></a><img src="God's%20Dice%20CN.files/God's%20Dice%20CN10015.png" name="图像36" align="bottom" width="491" height="285" border="0"/>
+
+&nbsp;</p>
+<p align="center"><a name="_x0000_i1038"></a><a name="_x0000_i1037"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN10017.png" name="图像37" align="bottom" width="273" height="141" border="0"/>
+
+&nbsp;<img src="God's%20Dice%20CN.files/God's%20Dice%20CN10019.png" name="图像38" align="bottom" width="274" height="143" border="0"/>
+
+</p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">从上面的运行是数据我们可以看到：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">波动率随偏差标准差增加而增加：数据显示随着价值投资者偏差标准差的增加，市场日波动率显著上升。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">市场在价格下跌时的波动性大于上涨时的波动性。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">最大回撤随偏差标准差增加而增加：数据显示随着价值投资者偏差标准差的增加，市场的最大回撤也随之增加。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">所有设置下价格与价值均正相关，</font></p>
+<p style="line-height: 113%; text-indent: -0.78cm; margin-left: 2.33cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">5)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">价格与价值的平均偏离度与</font></font><font face="微软雅黑 Light, sans-serif">偏差标准差正相关，表明价值投资者各自估值分布越大价格的波动就越大。</font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">以上说明价值投资者的偏差标准差参数对市场波动性有显著影响。随着</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">bias_percent_std</span></font></span></font><font face="微软雅黑 Light, sans-serif">的增加，市场波动性、最大回撤以及价格与价值的偏离度等指标均发生显著变化。当然，上述波动率数据是</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">20</span></font></span></font><font face="微软雅黑 Light, sans-serif">次测试后统计层面的波动率，对于单次测试由于其具有随机漫步的特性，其波动就可能表现更加剧烈了。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US"><b>2.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>追涨杀跌型投资者</b></font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">在我们的假设中，追涨杀跌型投资者有个参数，就是：观察周期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N</span></font></span></font><font face="微软雅黑 Light, sans-serif">天，代表该种投资者计算价格变化速度时所考虑的历史价格数据的天数。在这一段里，我们将比较不同观察周期的追涨杀跌型投资者，对市场有什么不同的影响。我们设置了三种不同的观察周期：短期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(N=3)</span></font></span></font><font face="微软雅黑 Light, sans-serif">、中期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(N=10)</span></font></span></font><font face="微软雅黑 Light, sans-serif">和长期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(N=20)</span></font></span></font><font face="微软雅黑 Light, sans-serif">，通过蒙特卡洛模拟方法每种设置运行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">20</span></font></span></font><font face="微软雅黑 Light, sans-serif">次模拟，以确保结果的统计可靠性。（代码详见</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_chase_period.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">）</font></p>
+<p align="center" style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><a name="_x0000_i1036"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN10584.png" name="图像39" align="bottom" width="444" height="213" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3">&nbsp;</p>
+<p align="center" style="text-indent: -1.16cm; margin-left: 1.16cm"><a name="_x0000_i1035"></a><a name="_x0000_i1034"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN10587.png" name="图像40" align="bottom" width="283" height="137" border="0"/>
+
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN10588.png" name="图像41" align="bottom" width="296" height="143" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">运行之后，主要可以发现一下现象：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">市场波动性与观察周期的关系：随着</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">ChaseInvestor</span></font></span></font><font face="微软雅黑 Light, sans-serif">观察周期的增加，市场整体波动性呈现下降趋势。</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">短期观察周期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(N=3)</span></font></span></font><font face="微软雅黑 Light, sans-serif">：平均日波动率为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.5374%</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">中期观察周期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(N=10)</span></font></span></font><font face="微软雅黑 Light, sans-serif">：平均日波动率为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.4555%</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">长期观察周期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(N=20)</span></font></span></font><font face="微软雅黑 Light, sans-serif">：平均日波动率为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1.4121%</span></font></span></font></p>
+<p style="margin-left: 2.33cm; orphans: 6"><font face="微软雅黑 Light, sans-serif">这表明，当追涨杀跌型投资者使用更长的观察周期来评估价格趋势时，市场价格波动会变得更加平稳。这可能是因为长期观察周期使投资者对短期价格波动不那么敏感，从而减少了过度反应和频繁交易。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">上行与下行波动性分析：在所有三种观察周期设置下，下行波动性均略高于上行波动性，且这种差异随着观察周期的增加而扩大：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.96cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=3</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，上行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">/</span></font></span></font><font face="微软雅黑 Light, sans-serif">下行波动率比率为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.9993</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.96cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=10</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，上行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">/</span></font></span></font><font face="微软雅黑 Light, sans-serif">下行波动率比率为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.9667</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.96cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=20</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，上行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">/</span></font></span></font><font face="微软雅黑 Light, sans-serif">下行波动率比率为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.9592</span></font></span></font></p>
+<p style="margin-left: 2.33cm; orphans: 6"><font face="微软雅黑 Light, sans-serif">这一发现表明，无论观察周期如何，市场在价格下跌时的波动性都大于上涨时的波动性，这与现实市场中常见的</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">恐慌性抛售</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">&quot;</span></font></span></font><font face="微软雅黑 Light, sans-serif">现象相符。随着观察周期增加，这种不对称性更加明显。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">价格与价值的关系：在所有观察周期设置下，市场价格与基础价值之间都保持较强的正相关性，但这种相关性随着观察周期的增加而减弱</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=3</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，相关性为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.9670</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=10</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，相关性为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.9358</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=20</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，相关性为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.9261</span></font></span></font></p>
+<p style="margin-left: 2.33cm; orphans: 6"><font face="微软雅黑 Light, sans-serif">同时，价格与价值的平均偏离度随观察周期增加而增大：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=3</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，平均偏离度为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">10.1180%</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=10</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，平均偏离度为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">12.7666%</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=20</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，平均偏离度为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">14.7752%</span></font></span></font></p>
+<p style="margin-left: 2.33cm; orphans: 6"><font face="微软雅黑 Light, sans-serif">这表明，当追涨杀跌型投资者使用更长的观察周期时，市场价格更容易偏离基础价值，市场效率可能降低。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US">4)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">最大回撤分析：最大回撤是衡量投资风险的重要指标。研究发现，随着观察周期的增加，市场的平均最大回撤显著增加。</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=3</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，平均最大回撤为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">63.0137%</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=10</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，平均最大回撤为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">65.9761%</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 2.82cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Symbol"><font size="2" style="font-size: 10pt"><span lang="en-US">·</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span><font face="微软雅黑 Light, sans-serif"><span lang="en-US">N=20</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，平均最大回撤为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">67.8714%</span></font></span></font></p>
+<p style="margin-left: 2.33cm; orphans: 6"><font face="微软雅黑 Light, sans-serif">同时，最大回撤的标准差也随观察周期增加而增大（从</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">2.6433%</span></font></span></font><font face="微软雅黑 Light, sans-serif">增至</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5.9085%</span></font></span></font><font face="微软雅黑 Light, sans-serif">），表明长期观察周期不仅增加了回撤幅度，也增加了回撤的不确定性。</font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">通过上述的现象，我们从统计意义上来说大致可以总结以下一些结论：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">较短的观察周期导致更高的市场波动性：当追涨杀跌型投资者对短期价格变化更敏感时，市场整体波动性增加。这可能是因为他们更频繁地交易，放大了价格波动。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">较长的观察周期导致更大的最大回撤：虽然长期观察周期降低了日常波动性，但却增加了极端下跌的风险。这可能是因为长期观察周期使投资者对市场转向的反应更慢，导致下跌趋势持续更长时间，市场反转更慢。短期观察周期则可能使市场更快地从下跌中恢复，趋势反转更频繁。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">较长的观察周期降低了市场效率：随着观察周期增加，价格与基础价值的偏离度增大，表明市场价格反映基础价值的能力下降。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">所有观察周期设置下，市场下跌时的波动性都大于上涨时：这种不对称性随观察周期增加而更加明显，反映了投资者在面对损失时比面对收益时更敏感的行为特征。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">5)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">短期观察周期能够使市场价格更好地跟随基础价值变化，形成与基础价值更一致的趋势。随着观察周期增加，价格与价值的相关性降低，偏离度增加，表明长期观察周期可能导致市场价格形成与基础价值不一致的趋势。</font></p>
+<p style="margin-left: 2.33cm; orphans: 6">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 1.55cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Times New Roman, serif"><span lang="en-US"><b>3.</b></span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;</span></font></span></span></font><font face="微软雅黑 Light, sans-serif"><b>趋势投资者</b></font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">本节我们分析一下趋势投资者（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">TrendInvestor</span></font></span></font><font face="微软雅黑 Light, sans-serif">）的趋势周期配置对股票市场模拟的影响。通过运行</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">20</span></font></span></font><font face="微软雅黑 Light, sans-serif">次蒙特卡洛模拟（</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_trend_period.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">），我们比较了三种不同的趋势周期组配置：</font></p>
+<p style="text-indent: -0.64cm; margin-left: 2.12cm">²<span style="font-variant: normal">&nbsp;
+</span><font face="微软雅黑 Light, sans-serif">短周期组</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(Short-term
+Group): </span></font></span></font><font face="微软雅黑 Light, sans-serif">使用</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5</span></font></span></font><font face="微软雅黑 Light, sans-serif">天、</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">7</span></font></span></font><font face="微软雅黑 Light, sans-serif">天和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">10</span></font></span></font><font face="微软雅黑 Light, sans-serif">天移动平均线的趋势投资者</font></p>
+<p style="text-indent: -0.64cm; margin-left: 2.12cm">²<span style="font-variant: normal">&nbsp;
+</span><font face="微软雅黑 Light, sans-serif">中周期组</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(Medium-term
+Group): </span></font></span></font><font face="微软雅黑 Light, sans-serif">使用</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">30</span></font></span></font><font face="微软雅黑 Light, sans-serif">天、</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">45</span></font></span></font><font face="微软雅黑 Light, sans-serif">天和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">60</span></font></span></font><font face="微软雅黑 Light, sans-serif">天移动平均线的趋势投资者</font></p>
+<p style="text-indent: -0.64cm; margin-left: 2.12cm">²<span style="font-variant: normal">&nbsp;
+</span><font face="微软雅黑 Light, sans-serif">长周期组</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(Long-term
+Group): </span></font></span></font><font face="微软雅黑 Light, sans-serif">使用</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">120</span></font></span></font><font face="微软雅黑 Light, sans-serif">天、</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">160</span></font></span></font><font face="微软雅黑 Light, sans-serif">天和</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">200</span></font></span></font><font face="微软雅黑 Light, sans-serif">天移动平均线的趋势投资者</font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">所有模拟中</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">ChaseInvestor</span></font></span></font><font face="微软雅黑 Light, sans-serif">的观察周期均固定为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">10</span></font></span></font><font face="微软雅黑 Light, sans-serif">。</font></p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1033"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN12235.png" name="图像42" align="bottom" width="579" height="271" border="0"/>
+
+&nbsp;</p>
+<p align="center"><a name="_x0000_i1032"></a><a name="_x0000_i1031"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN12237.png" name="图像43" align="bottom" width="284" height="135" border="0"/>
+
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN12238.png" name="图像44" align="bottom" width="284" height="134" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">根据运行结果数据，我们大致可以分析出以下一些结论：</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">1)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">波动性分析：短周期趋势投资者产生的市场波动率明显低于中周期和长周期趋势投资者。波动率与趋势周期之间存在一定关系，虽然不一定是简单的线性关系，但总体上短周期趋势投资者能够产生更低的市场波动性。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">2)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">回撤分析：短周期趋势投资者产生的最大回撤显著小于中周期和长周期趋势投资者；长周期趋势投资者产生的最大回撤标准差最小，表明其回撤模式更加稳定和可预测。中周期趋势投资者往往产生最大的回撤和最高的回撤标准差。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">3)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">价格与价值关系分析：仅有短周期趋势投资者参与的市场，价格与真实价值的相关性最高，表明短周期趋势跟踪可能更有效地反映基本面价值；中周期趋势投资者产生的价格与价值的平均偏离度最小，表明中期趋势可能在价格发现方面更有效率；长周期趋势投资者下，价格与价值的相关性最低，偏离度较高，表明长期趋势跟踪可能导致价格与基本面价值的一定程度脱节。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">4)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">市场稳定性：仅有短周期趋势投资者的模拟产生的市场波动率和最大回撤均较低，表明短期趋势跟踪可能有助于市场稳定。这一发现与传统观点（认为短期交易增加波动性）相反，值得进一步研究。一个可能的解释是，短周期趋势投资者能够更快地对价格偏离做出反应，从而减少了大幅波动的可能性。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">5)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">市场非对称性：在不同的模拟参数设置下，市场可能表现出不同的波动非对称性。在某些情况下，下行波动可能大于上行波动，而在其他情况下，上行波动可能大于下行波动。这种非对称性的变化表明市场波动特性对参数设置敏感，需要在不同市场环境中进行进一步研究。</font></p>
+<p style="text-indent: -0.78cm; margin-left: 2.33cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="Liberation Serif, serif"><span lang="en-US">6)</span></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">投资策略启示：结合短周期和中周期趋势信号可能是最优的投资策略，短周期信号提供更高的价值相关性和更低的波动率，而中周期信号提供更低的价格偏离度。在风险管理方面，应当根据市场中主导的趋势投资者类型调整策略，特别是在以中周期趋势投资者为主的市场中，需要准备应对更高的波动率和更大的回撤风险。</font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3"><font face="微软雅黑 Light, sans-serif">这些结论表明，趋势投资者所使用的移动平均线周期对市场行为有显著影响，不同周期的趋势投资者在市场稳定性、价格发现和风险特性方面各有优劣。</font></p>
+<p style="text-indent: 0.74cm; margin-left: 1.16cm; orphans: 3">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><font face="Times New Roman, serif"><span lang="en-US"><b>八、</b></span></font><font face="微软雅黑 Light, sans-serif"><b>交易者的盈利预期</b></font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">本章节我们将观察一下模型中参与市场交易者各类投资在市场中的表现。</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_asset_return_analysis_1.2.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">本次测试进行了</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">400</span></font></span></font><font face="微软雅黑 Light, sans-serif">次为期</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1200</span></font></span></font><font face="微软雅黑 Light, sans-serif">天的蒙特卡罗模拟，交易费率买卖都设为</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">0.1%</span></font></span></font><font face="微软雅黑 Light, sans-serif">。每次模拟使用不同的随机种子，确保了测试的全面性和代表性。投资者配置如下表所示：</font></p>
+<center>
+	<table width="604" cellpadding="0" cellspacing="0">
+		<tr>
+			<td width="188" style="border: 1.00pt solid #393b40; padding: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>投资者类型</b></font></font></p>
+			</td>
+			<td width="104" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>数量</b></font></font></p>
+			</td>
+			<td width="312" style="border-top: 1.00pt solid #393b40; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0.05cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><b>特点</b></font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">ValueInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">基于价值偏差进行交易，偏差标准差为</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">0.30</span></font></font></span></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">ChaseInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">追涨杀跌，观察期随机</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">(5-20</span></font></font></span></font><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">天</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">)</span></font></font></span></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">TrendInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">基于移动平均线交叉信号，周期分布在</font></font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">5-200</span></font></font></span></font><font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">天</font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">RandomInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">50</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">随机交易决策</font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">NeverStopLossInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">10</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">不设止损，持续持有直到达到盈利目标</font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">BottomFishingInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">10</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">抄底策略，在连续下跌后买入</font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">InsiderInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">5</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">内幕交易者，能预知价值变化</font></font></p>
+			</td>
+		</tr>
+		<tr>
+			<td width="188" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: 1.00pt solid #393b40; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0.05cm; padding-right: 0.05cm"><p align="center">
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">MessageInvestor</span></font></font></p>
+			</td>
+			<td width="104" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt"><span lang="en-US">5</span></font></font></p>
+			</td>
+			<td width="312" style="border-top: none; border-bottom: 1.00pt solid #393b40; border-left: none; border-right: 1.00pt solid #393b40; padding-top: 0cm; padding-bottom: 0.05cm; padding-left: 0cm; padding-right: 0.05cm"><p>
+				<font face="微软雅黑 Light, sans-serif"><font size="2" style="font-size: 10pt">消息投资者，滞后获知价值变化</font></font></p>
+			</td>
+		</tr>
+	</table>
+</center>
+<p style="text-indent: 0.74cm">&nbsp;</p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">下面的上图展示了各类投资者在模拟期间的平均资产增值百分比变化，横轴为交易日，纵轴为资产增值百分比。下图展示了各类投资者的总收益率和年化收益率对比，蓝色柱为总收益率</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(%)</span></font></span></font><font face="微软雅黑 Light, sans-serif">，红色柱年化收益率
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(%)</span></font></span></font><font face="微软雅黑 Light, sans-serif">【注意：年化收益率基于</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">250</span></font></span></font><font face="微软雅黑 Light, sans-serif">个交易日</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">/</span></font></span></font><font face="微软雅黑 Light, sans-serif">年的假设计算】。</font></p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1030"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN13693.png" name="图像45" align="bottom" width="507" height="290" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="margin-left: 0.78cm">&nbsp;</p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1029"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN13696.png" name="图像46" align="bottom" width="503" height="287" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">我们根据收益率大小对本模型假设的投资者表现进行排名：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">追涨杀跌投资者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(ChaseInvestor)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">抄底投资者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(BottomFishingInvestor)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">价值投资者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(ValueInvestor)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">内幕交易者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(InsiderInvestor)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">消息投资者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(MessageInvestor)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">永不止损投资者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(NeverStopLossInvestor)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">趋势投资者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(TrendInvestor)</span></font></span></font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">跟随市场情绪走的随机投资者
+</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">(RandomInvestor)</span></font></span></font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">这个结果和我们直观想象的或者以为的有不小差距，特别是追涨杀跌者遥遥领先。这个结果只是我们这个模型的测试表现，不等同于实际市场的情况。模型和实际市场相比，有以下不同点：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">模型只模拟了有限几类具有一定代表性的投资者类型，实际市场上的投资者类型可能不计其数；</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">模型的投资者数量较小，其数量比例是我们在缺乏数据的情况下随意设置，不和实际市场相同。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">因此，我们有更多实际市场数据时，或许能够获得更加接近实际市场的测试数据。下面两张图则显示了交易费率对市场盈利的影响。当我们提升买卖费率到</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">1%</span></font></span></font><font face="微软雅黑 Light, sans-serif">时，虽然如前面演示对市场平均波动的影响不大，但对各类市场交易者来说其回报率大大降低，这点也符合我们直观感受。</font></p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1028"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN14229.png" name="图像47" align="bottom" width="528" height="302" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1027"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN14231.png" name="图像48" align="bottom" width="535" height="306" border="0"/>
+
+&nbsp;</p>
+<p style="text-indent: 0.74cm"><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_asset_return_analysis_1.3.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">则是修改自</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">MC_simulation_asset_return_analysis_1.2.py</span></font></span></font><font face="微软雅黑 Light, sans-serif">。蒙特卡罗方法测试方法不变，所有交易者设置和参数不变，交易运行不变，但我们只关注不同周期趋势投资者的平均资产曲线、总收益和年化收益率。</font></p>
+<p style="text-indent: 0.74cm">&nbsp;</p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1026"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN14392.png" name="图像49" align="bottom" width="535" height="306" border="0"/>
+
+&nbsp;</p>
+<p align="center" style="margin-left: 0.78cm"><a name="_x0000_i1025"></a>
+<img src="God's%20Dice%20CN.files/God's%20Dice%20CN14394.png" name="图像50" align="bottom" width="535" height="306" border="0"/>
+
+&nbsp;</p>
+<p style="margin-left: 0.78cm">&nbsp;</p>
+<p style="text-indent: -0.78cm; margin-left: 0.78cm"><span lang="en-US"><b>九、</b></span><font face="微软雅黑 Light, sans-serif"><b>总结</b></font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">我们观察个股走势，由于参与者行为的随机性以及随机发生的影响估值的各种事件和信息，所以个股展示出随机漫步的特征。我们观察到的个股走势序列只是一个（概率论意义上的）随机事件，是千千万万可能性中的一种。因为我们无法回到过去再来一遍，我们也不可能穿越平行宇宙去观测，在这个世界中我们也只能看到一个有各种巧合偶合而成的随机序列，它属于无限样本空间中的一个样本。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">而通过基于行为的模型和分析方法，我们可以最大程度去发现市场真相，因为我们可以使用概率论和统计学的工具，去总结和发现问题本质。我们不需要追求预测市场走势的能力，因为我们无法做到，但我们可以发现统计意义规律性，发现有效且持久盈利模式。很多量化投资者（包括我曾经也是）就是陷入这样的误区，寄希望于从历史的数据中得出盈利的方法，但往往通过大量计算，获得的可能只是基于一个随机事件的幸存者偏差，缺乏广泛的适应性。我们有幸找的了这个躲过了无数子弹的幸运者，但谁又能预料下一颗子弹是否会终结一切。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">我们回到本文的模型中，回顾一下之前的工作：</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">我们基于市场参与者行为模拟出了一个股市价格序列，这个价格序列符合随机漫步的特征。在这一步，我们提出本文最重要的一个观点：</font><u><font face="微软雅黑 Light, sans-serif">股市参与者的各种随机行为是股价走势随机性的主要原因，而不是单纯由有效市场假说和随机漫步理论所说的不可预测的经济数据、政治事件等信息所驱动。</font></u></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">在该模型中，我们验证存在蝴蝶效应。并且我们模拟了收盘价改变、参与交易等情况所产生的蝴蝶效应。在一系列模拟我们获得了一些有趣的发现，比如：“</font><u><font face="微软雅黑 Light, sans-serif">哪怕很小的资金接入都可因引起股市未来走势</font></u>”<font face="微软雅黑 Light, sans-serif">，而其中最有趣的是：“</font><u><font face="微软雅黑 Light, sans-serif">不论成交与否，只要参与到市场中来就会对未来的价格序列产生影响</font></u>”<font face="微软雅黑 Light, sans-serif">。</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">由于价格序列随机性，我们采用蒙特卡罗方法进行分析。</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">我们探索了资金面对市场的影响。</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">我们探索了本模型中三类主要投资者（价值投资者、追涨杀跌者、趋势投资者）采用不同操作方式（参数）时给市场带来的影响。</font></p>
+<p style="line-height: 113%; text-indent: -0.64cm; margin-left: 1.27cm">
+<font face="Liberation Serif, serif"><span lang="en-US"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">o</span></font></font><span style="font-variant: normal"><font face="Liberation Serif, serif"><span lang="en-US">&nbsp;&nbsp;&nbsp;
+</span></font></span></span></font><font face="微软雅黑 Light, sans-serif">我们模拟了本模型中所有投资者资产曲线的变化，了解了他们的收益率情况。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">在本文的模型中，我们所有的市场参与者虽然有一定的现实依据，但都是假想出来的，他们在市场中的比例、所持的资金、所有的行为都是随意设置的，所以模拟中的结果和发现仅仅供参考并不一定能够反映真实的市场。但在大数据的今天，每个用户资金持仓数据和买卖行为数据都在数据库中保存。如果获得这样的数据，我们是能够训练出一个神经网络模型，输入是市场环境和信息等数据，输出是用户的行为概率（在某个条件下在某个时间点进行交易的概率）。这样再使用本文的模型，可以最大程度接近真相，发现其中的规律，寻找盈利的机会，或者进行市场调控。但由于蝴蝶效应的存在，我们不要指望能够精确预测未来股价或者走势，因为不可能做到。我感觉，对于量化投资者来说也可以用类似模型结合大数据通过强化学习的方法，来训练自己的盈利</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">agent</span></font></span></font><font face="微软雅黑 Light, sans-serif">，真正战胜市场。</font></p>
+<p style="text-indent: 0.74cm"><font face="微软雅黑 Light, sans-serif">最后，仍然做个声明：以上模型的建立是在本人对探索市场运行规律的业余爱好和对经济学理论肤浅理解的基础上独立建立起来的，似乎能一定程度上反应市场规律，有和市场现象相拟合的，也有不那么匹配的（比如说量价关系）。似乎能总结出一些规律，但又有点似是而非。鉴于本人的学术能力有限、认知有限，模型也过于简化，有太多基于日常经验的假设，因此该模型只能看作一个有趣的试验游戏，抑或可以作为一个教学工具。另外，本人的程序开发能力也比较有限，很多代码利用</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">AI</span></font></span></font><font face="微软雅黑 Light, sans-serif">生成，或许一句代码的瑕疵就可能推翻全部的结论。本模型在各种条件下的运行测试数量也不够，没有用足够多的数据进行归纳总结，文中所涉及的某些结论只能称之为猜想，可能并不足以全方位解释和理解市场。所以，我将各个进化的代码版本开源于此，供志同道合者一起把玩雕琢改进。</font></p>
+<p style="text-indent: 0.74cm">&nbsp;</p>
+<p style="text-indent: 0.74cm">&nbsp;</p>
+<p><font face="微软雅黑 Light, sans-serif">毅</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">翀</span></font></span></font></p>
+<p><font face="微软雅黑 Light, sans-serif">完稿于</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">2025</span></font></span></font><font face="微软雅黑 Light, sans-serif">年</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">5</span></font></span></font><font face="微软雅黑 Light, sans-serif">月</font><font face="Liberation Serif, serif"><span lang="en-US"><font face="微软雅黑 Light, sans-serif"><span lang="en-US">13</span></font></span></font><font face="微软雅黑 Light, sans-serif">日</font></p>
+<p style="text-indent: 0.74cm">&nbsp;</p>
+</body>
+</html>
