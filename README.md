@@ -57,8 +57,3 @@ This is a quantitative simulation system for studying randomness in financial ma
 - Matplotlib
 - Pandas (optional, for data analysis)
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-## Acknowledgments
